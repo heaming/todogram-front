@@ -31,6 +31,98 @@
     -ms-overflow-style: none; /* IE/Edge */
     scrollbar-width: none; /* Firefox */
   }
+
+  /* calendar */
+  .rdp-day {
+    color: #9e9e9e;
+    font-size: 0.85rem;
+    position: relative;
+  }
+
+  /* 일요일 (Sunday) 색상 */
+  .rdp-weekday:nth-child(7n+1) {
+    color: #e57373; /* 일요일 색상 */
+  }
+
+  /* 토요일 (Saturday) 색상 */
+  .rdp-weekday:nth-child(7n) {
+    color: #7986cb; /* 토요일 색상 */
+  }
+
+  /* 일요일: 일주일에서 첫 번째 날 */
+  .rdp-day:nth-child(7n + 1) {
+    color: #e57373;
+  }
+
+  /* 토요일: 일주일에서 일곱 번째 날 */
+  .rdp-day:nth-child(7n) {
+    color: #7986cb;
+  }
+
+  /* 다른 달의 날짜 (outside days) */
+  .rdp-day_outside {
+    color: #e0e0e0 !important;
+  }
+
+  .rdp-today {
+    color: #424242 !important;
+    font-size: 0.85rem !important;
+  }
+
+  .rdp-day_button.all-done:not(.rdp-selected){
+    background-image: url("../../public/icons8-circle-96.png") !important;
+    background-size: 28px 28px !important; /* 원의 크기 */
+    background-position: center !important; /* 원을 버튼의 중앙에 위치 */
+    background-repeat: no-repeat !important;  /* 배경 반복 금지 */
+    z-index: 0 !important; /* 버튼보다 뒤에 배치 */
+    color: white !important;
+  }
+
+  .rdp-selected .rdp-day_button.all-done {
+    border: var(--rdp-selected-border);
+    color: #166534 !important;
+  }
+
+
+  //.rdp-day_button.all-done {
+  //  background: #59D283 !important;
+  //  content: "";
+  //  position: absolute;  /* 버튼 위에 원을 배치 */
+  //  border-radius: 50%;
+  //  top: 50%;  /* 버튼의 세로 가운데에 위치 */
+  //  left: 50%;  /* 버튼의 가로 가운데에 위치 */
+  //  width: 20px;  /* 원의 크기 */
+  //  height: 20px;  /* 원의 크기 */
+  //  transform: translate(-50%, -50%);
+  //  z-index: -1;
+  //}
+
+  //.rdp-day_button.all-done::after {
+  //  content: ''; /* 점을 생성 */
+  //  position: absolute;
+  //  top: 2px; /* 날짜 위에 위치하게 설정 */
+  //  left: 50%;
+  //  transform: translateX(-50%); /* 가운데 정렬 */
+  //  width: 6px; /* 점 크기 */
+  //  height: 6px;
+  //  border-radius: 50%; /* 원형으로 설정 */
+  //  background-color: #59D283; /* 점 색상 */
+  //}
+
+
+  /* 오늘 날짜이면서 선택된 날짜 스타일 */
+  //.rdp-today.rdp-selected {
+  //  color: white !important; /* 글씨 색은 회색 */
+  //}
+
+  .rdp-caption_label {
+    color: #424242;
+    font-size: medium;
+  }
+
+  .rdp-month_caption {
+    padding: 15px;
+  }
 }
 
 :root {

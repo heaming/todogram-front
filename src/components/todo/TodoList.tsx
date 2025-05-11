@@ -5,11 +5,11 @@ import {Circle, Clock3, Plus} from "lucide-react";
 
 interface TodoListProps {
     todos: Todo[];
-    onDelete: (id: number) => void;
-    onEdit: (id:number, newContent: string) => void;
+    onDelete: (id: string) => void;
+    onEdit: (id:string, newContent: string) => void;
     onAdd: (content: string) => void
-    onDone: (id: number) => void;
-    onHandleTime: (id: number, time: string, ampm: string) => void;
+    onDone: (id: string) => void;
+    onHandleTime: (id: string, timeAt: string, timeAmpm: string) => void;
     color: string;
 }
 
@@ -26,7 +26,7 @@ const TodoList = ({ todos, onDelete, onEdit, onAdd, onDone, onHandleTime, color 
         <div className="p-3 border-t-1 border-dotted m-1"
              style={{ borderColor: color }}
         >
-            {todos.map((todo) => (
+            {todos && todos.map((todo) => (
                 <TodoItem
                     key={todo.id}
                     todo={todo}
@@ -64,6 +64,6 @@ const TodoList = ({ todos, onDelete, onEdit, onAdd, onDone, onHandleTime, color 
             </div>
 
             );
-            };
+};
 
-            export default TodoList;
+export default TodoList;

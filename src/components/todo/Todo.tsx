@@ -1,155 +1,184 @@
-import React, {useState} from 'react';
-import Category from "@/components/todo/Category";
+import React, {useEffect, useState} from 'react';
+import CategoryList from "@/components/todo/CategoryList";
 import TodoList from "@/components/todo/TodoList";
+import dayjs from "dayjs";
+import type {Todo, Category} from "@/models/todo";
+import {generateKeyBetween} from 'fractional-indexing';
 
-const tempTodos = [
-    {
-        id: 0,
-        sort: 'a',
-        content: '혜미랑 댕굴aa1',
-        createdAt: '',
-        deletedAt: '',
-        isDone: true,
-        time: {
-            time: '',
-            ampm: 'AM',
+require('dayjs/locale/ko');
+dayjs().locale('ko');
+
+interface TodoProps {
+    selectedDate: Date | undefined;
+}
+
+const Todo = ({ selectedDate }: TodoProps) => {
+    const [todos, setTodos] = useState<Todo[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [todosColor, setTodosColor] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+
+    const getTodos = async (categoryId: string, date: string) => {
+        try {
+            const todos = await window.api.getTodos(categoryId, date);
+            return todos;
+        } catch (e) {
+            console.log('Failed to get todos :',e);
+            return [];
         }
-    },
-    {
-        id: 1,
-        sort: 'b',
-        content: '혜미랑 댕굴adgadgs2',
-        createdAt: '',
-        deletedAt: '',
-        isDone: false,
-        time: {
-            time: '',
-            ampm: 'AM',
+    }
+
+    const deleteTodo = async (id: string) => {
+        try {
+            await window.api.deleteTodo(id);
+        } catch (e) {
+            console.log('Failed to delete todo :',e);
         }
-    },
-];
+    }
+
+    const editTodoContent = async (id: string, newContent: string) => {
+        try {
+            await window.api.updateTodoContent(id, newContent);
+        } catch (e) {
+            console.log('Failed to edit todo :',e);
+        }
+    }
+
+    const addTodo = async (content: string) => {
+        const generateSort = () => {
+            if (todos && todos.length > 0) {
+                return generateKeyBetween(todos[todos.length-1].sort, null);
+            } else {
+                return generateKeyBetween(null, null);
+            }
+        }
+        const sort = generateSort();
+
+        const request = {
+            id: '',
+            userId: '',
+            categoryId: selectedCategory,
+            sort: sort,
+            content: content,
+            date: dayjs(selectedDate).format('YYYYMMDD'),
+            timeAt: '',
+            timeAmpm: '',
+            status: false,
+        }
 
 
-const tempCategory = [
-    {
-        id: 1,
-        content: 'CS',
-        color: '#f06292',
-        createdAt: '',
-        deletedAt: '',
-        sort: '',
-    },
-    {
-        content: '소싱',
-        color: '#3f51b5',
-        deletedAt: '',
-        createdAt: '',
-        sort: '',
-        id: 2,
-    },
-    {
-        content: '혜미랑',
-        color: '#ffb300',
-        deletedAt: '',
-        createdAt: '',
-        sort: '',
-        id: 3,
-    },
-    {
-        content: '영일이',
-        color: '#039be5',
-        deletedAt: '',
-        createdAt: '',
-        sort: '',
-        id: 4,
-    },
-    {
-        content: '제주도',
-        color: '#3f51b5',
-        deletedAt: '',
-        createdAt: '',
-        sort: '',
-        id: 5,
-    },
-    {
-        content: '또 어디가지',
-        color: '#3e6c3f',
-        deletedAt: '',
-        createdAt: '',
-        sort: '',
-        id: 6,
-    },
-    {
-        content: '또 어디가지22',
-        color: '#d3846b',
-        deletedAt: '',
-        createdAt: '',
-        sort: '',
-        id: 7,
-    },
-    {
-        content: '또 어디가지233',
-        color: '#814785',
-        deletedAt: '',
-        createdAt: '',
-        sort: '',
-        id: 8,
-    },
-]
+        console.log(request);
+        try {
+            const newTodo = await window.api.addTodo(request);
+            return newTodo;
+        } catch (e) {
+            console.log('Failed to add todo :',e);
+        }
+        return null;
+    }
 
-const Todo = () => {
-    const [todos, setTodos] = useState(tempTodos);
-    const [categories, setCategories] = useState(tempCategory);
-    const [todosColor, setTodosColor] = useState(tempCategory[0].color);
-
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
+        deleteTodo(id);
         setTodos((prev) => prev.filter(todo => todo.id != id));
     }
 
-    const handleEdit = (id: number, newContent: string) => {
-        console.log("edit");
+    const handleEdit = (id: string, newContent: string) => {
+        editTodoContent(id, newContent);
     }
 
-    const handleAdd = (newTodo: string) => {
-        const request = {
-            id: todos[todos.length-1].id+1,
-            sort: 'c',
-            content: newTodo,
-            createdAt: '',
-            deletedAt: '',
-            isDone: false,
-            time: {
-                time: '',
-                ampm: 'AM',
-            },
+    const handleAdd = async (content: string) => {
+        const newTodo = await addTodo(content);
+
+        if (newTodo) {
+            setTodos((prev) => [...prev, newTodo]);
         }
-
-        setTodos([...todos, request]);
     }
 
-    const handleDone = (id: number) => {
+    const handleState = (id: string) => {
         setTodos((prev) =>
-            prev.map((todo) =>
-                todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
-            )
-        );
-    }
+            prev.map(todo => {
+                    const isChangedTodo = todo.id === id;
+                    if (isChangedTodo) {
+                        try {
+                            window.api.updateTodoStatus(id, !todo.status)
+                        } catch (e) {
+                            console.log(e);
+                        }
+                        return {...todo, status: !todo.status};
+                    }
+                    return todo;
+                }
 
-    const handleTime = (id: number, time: string, ampm: string) => {
+            )
+        )
+    };
+
+    const handleTime = (id: string, timeAt: string, timeAmpm: string) => {
         setTodos((prev) =>
-            prev.map((todo) =>
-                todo.id === id ? { ...todo, time: {time, ampm} } : todo
+            prev.map(todo => {
+                    const isChangedTodo = todo.id === id;
+                    if (isChangedTodo) {
+                        try {
+                            window.api.updateTodo(id,{...todo, timeAt: timeAt, timeAmpm: timeAmpm })
+                        } catch (e) {
+                            console.log(e);
+                        }
+                        return {...todo, timeAt: timeAt, timeAmpm: timeAmpm };
+                    }
+                    return todo;
+                }
             )
-        );
+        )
     }
 
-    const handleCategory = (id: number) => {
+    const handleCategory = (id: string) => {
+        setSelectedCategory(id);
         setTodosColor(categories.filter(x => x.id === id)[0].color);
     }
 
+    useEffect(() => {
+        const fetchTodos = async () => {
+            const _date = dayjs(selectedDate).format('YYYYMMDD');
+            const todos = await getTodos(selectedCategory, _date);
+            setTodos(todos);
+        }
+
+        fetchTodos();
+    }, [selectedDate, selectedCategory]);
+
+    useEffect(() => {
+
+    }, [categories]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            if (typeof window !== 'undefined' && window.api) {
+                try {
+                    const categories: Category[] = await window.api.getCategories('');
+                    setCategories(categories);
+                    setTodosColor(categories.length > 0 ? categories[0].color : '#f06292');
+                    if (categories && categories.length > 0) {
+                        setSelectedCategory(categories[0].id);
+                    }
+                } catch (e) {
+                    console.log('Failed to get Categories', e);
+                }
+            } else {
+                console.error('window.api is not available');
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     return (
         <div className="w-[400px]">
-            <Category
+            {/*<div className="flex justify-end mr-2">*/}
+            {/*    <Ellipsis*/}
+            {/*        size={18}*/}
+            {/*        className="rounded-full border-1 border-gray-500 p-1 text-zinc-500 hover:bg-gray-500 hover:text-white cursor-pointer"/>*/}
+            {/*</div>*/}
+            <CategoryList
                 categories={categories}
                 onClick={handleCategory}
             />
@@ -158,7 +187,7 @@ const Todo = () => {
                 onDelete={handleDelete}
                 onEdit={handleEdit}
                 onAdd={handleAdd}
-                onDone={handleDone}
+                onDone={handleState}
                 onHandleTime={handleTime}
                 color={todosColor}
             />

@@ -1,6 +1,16 @@
-// components/Layout.tsx
+'use client';
 
 import React, {ReactNode, useEffect, useState} from 'react';
+import {
+    Sheet, SheetClose,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger
+} from "@/components/ui/sheet";
+import {Button} from "@/components/ui/button";
 
 interface LayoutProps {
     children: ReactNode;
@@ -10,21 +20,37 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        setIsClient(true); // 클라이언트에서만 실행
+        setIsClient(true);
     }, []);
 
-    // 서버 사이드에서는 className을 기본 값으로 설정하고, 클라이언트에서만 변경
     const dynamicClassName = isClient ? 'min-h-screen flex flex-col' : 'min-h-screen flex flex-col';
 
     return (
         <div className={dynamicClassName}>
-            <header className="bg-gray-800 text-white p-4">
-                <nav>
-                    <ul className="flex space-x-4">
-                        <li><a href="/" className="hover:text-gray-400">Home</a></li>
-                        <li><a href="/about" className="hover:text-gray-400">About</a></li>
-                    </ul>
-                </nav>
+            <header className="bg-zinc-200 text-gray-600 p-4">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="outline">Open</Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="bg-gray-900 text-white w-[256px] p-4 transition duration-700">
+                            <SheetHeader>
+                                <SheetTitle>Edit profile</SheetTitle>
+                                <SheetDescription>
+                                    Make changes to your profile here. Click save when you're done.
+                                </SheetDescription>
+                            </SheetHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    Name
+                                </div>
+                            </div>
+                            <SheetFooter>
+                                <SheetClose asChild>
+                                    <Button type="submit">Save changes</Button>
+                                </SheetClose>
+                            </SheetFooter>
+                    </SheetContent>
+                </Sheet>
             </header>
             <main className="flex-grow p-4">
                 {children}

@@ -8,11 +8,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CategoryProps {
     categories: Category[];
-    onClick: (id: number) => void;
+    onClick: (id: string) => void;
 }
 
-const Category = ({ categories, onClick }: CategoryProps) => {
-    const [value, setValue] = useState(String(categories[0].id));
+const CategoryList = ({ categories, onClick }: CategoryProps) => {
+    const [value, setValue] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isLeftEnd, setIsLeftEnd] = useState(true);
     const [isRightEnd, setIsRightEnd] = useState(false);
@@ -28,7 +28,7 @@ const Category = ({ categories, onClick }: CategoryProps) => {
 
     const handleChange = (newValue: string) => {
         setValue(newValue);
-        onClick(Number(newValue));
+        onClick(newValue);
     };
 
     const checkScrollEnds = () => {
@@ -54,6 +54,12 @@ const Category = ({ categories, onClick }: CategoryProps) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (categories && categories.length > 0) {
+            setValue(categories[0].id);
+        }
+    }, [categories]);
+
     return (
         <div className="relative flex items-center w-full gap-2 mb-2">
             {/* Left Arrow */}
@@ -66,7 +72,6 @@ const Category = ({ categories, onClick }: CategoryProps) => {
             >
                 <ChevronLeft className="w-4 h-4" />
             </button>
-
             <div className="relative w-full overflow-hidden">
                 <Tabs
                     value={value}
@@ -77,13 +82,13 @@ const Category = ({ categories, onClick }: CategoryProps) => {
                         className="flex gap-0 overflow-x-auto no-scrollbar"
                     >
                         <TabsList className="flex w-max gap-1">
-                            {categories.map((item) => {
+                            {categories && categories.map((item) => {
                                 if (!item || typeof item.id === "undefined") return null;
-                                const isActive = value === String(item.id);
+                                const isActive = value === item.id;
                                 return (
                                     <TabsTrigger
                                         key={item.id}
-                                        value={String(item.id)}
+                                        value={item.id}
                                         className={`shrink-0 whitespace-nowrap text-xs px-4 rounded-md transition
                                             ${isActive
                                             ? `bg-white shadow-sm`
@@ -91,7 +96,7 @@ const Category = ({ categories, onClick }: CategoryProps) => {
                                         `}
                                         style={{
                                             borderColor: isActive ? item.color : "transparent",
-                                            color: isActive? item.color: '',
+                                            color: isActive ? item.color : '',
                                         }}
                                     >
                                         {item.content}
@@ -110,10 +115,10 @@ const Category = ({ categories, onClick }: CategoryProps) => {
                     ${isRightEnd ? "opacity-30 pointer-events-none" : "cursor-pointer"}
                 `}
             >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4"/>
             </button>
         </div>
     );
 };
 
-export default Category;
+export default CategoryList;

@@ -1,18 +1,18 @@
 export interface Todo {
-    id: number;
+    id: string | '';
+    userId: string;
     sort: string;
     content: string;
-    isDone: boolean;
-    time: {
-        time: string,
-        ampm: string,
-    }
-    createdAt: string;
-    deletedAt: string;
+    status: boolean;
+    date: string;
+    timeAt: string;
+    timeAmpm: string;
+    categoryId: string;
 }
 
 export interface Category {
-    id: number;
+    id: string;
+    userId: string;
     sort: string;
     content: string;
     createdAt: string;

@@ -1,25 +1,25 @@
 import React, {useState} from 'react';
 import type {Todo} from "@/models/todo";
 import {Button} from "@/components/ui/button";
-import {Circle, Clock3, Minus} from "lucide-react";
+import {CalendarArrowUp, Circle, Clock3, Minus} from "lucide-react";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group";
 
 interface TodoItemProps {
     todo: Todo;
-    onDelete: (id: number) => void;
-    onEdit: (id: number, content:string) => void;
-    onDone: (id: number) => void;
-    onHandleTime: (id: number, time: string, ampm: string) => void;
+    onDelete: (id: string) => void;
+    onEdit: (id: string, content:string) => void;
+    onDone: (id: string) => void;
+    onHandleTime: (id: string, timeAt: string, timeAmpm: string) => void;
     color: string;
 }
 
 const TodoItem = ({todo, onDelete, onEdit, onDone, onHandleTime, color} : TodoItemProps) => {
     const [content, setContent] = useState(todo.content);
-    const [toggleValue, setToggleValue] = useState(todo.time.ampm || 'AM');
-    const [hour, setHour] = useState(todo.time.time?.split(":")[0] || '');
-    const [minute, setMinute] = useState(todo.time.time?.split(":")[1] || '');
-    const [timeText, setTimeText] = useState(todo.time.time ? todo.time.time+todo.time.ampm : '');
+    const [toggleValue, setToggleValue] = useState(todo.timeAt || 'AM');
+    const [hour, setHour] = useState(todo.timeAt?.split(":")[0] || '');
+    const [minute, setMinute] = useState(todo.timeAt?.split(":")[1] || '');
+    const [timeText, setTimeText] = useState(todo.timeAt ? todo.timeAt+todo.timeAmpm : '');
     const [isTimerOpen, setIsTimerOpen] = useState(false);
 
     const handleAmToggle = (newToggleValue: string) => {
@@ -99,7 +99,7 @@ const TodoItem = ({todo, onDelete, onEdit, onDone, onHandleTime, color} : TodoIt
                         className="mr-1"
                         size={16}
                         color={color}
-                        fill={todo.isDone ? color : 'white'}
+                        fill={todo.status ? color : 'white'}
                         onClick={() => onDone(todo.id)}
                     />
                     <input
@@ -137,25 +137,27 @@ const TodoItem = ({todo, onDelete, onEdit, onDone, onHandleTime, color} : TodoIt
                             className="bg-white w-[120px] border border-gray-200 shadow-md rounded-md p-1 z-50 flex items-center gap-1"
                             sideOffset={4}
                         >
-                            <input
-                                className="w-1/3 text-center text-sm"
-                                type="text"
-                                maxLength={2}
-                                value={hour}
-                                onChange={(e) => handleTimeChange(e, 'hour')}
-                                onBlur={() => handleTimeBlur('hour')}
-                                placeholder="00"
-                            />
-                            :
-                            <input
-                                className="w-1/3 text-center text-sm"
-                                type="text"
-                                value={minute}
-                                maxLength={2}
-                                onChange={(e) => handleTimeChange(e, 'minute')}
-                                onBlur={() => handleTimeBlur('minute')}
-                                placeholder="00"
-                            />
+                            <div className="flex items-center justify-end">
+                                <input
+                                    className="w-1/3 text-sm"
+                                    type="text"
+                                    maxLength={2}
+                                    value={hour}
+                                    onChange={(e) => handleTimeChange(e, 'hour')}
+                                    onBlur={() => handleTimeBlur('hour')}
+                                    placeholder="00"
+                                />
+                                :
+                                <input
+                                    className="w-1/3 text-center text-sm"
+                                    type="text"
+                                    value={minute}
+                                    maxLength={2}
+                                    onChange={(e) => handleTimeChange(e, 'minute')}
+                                    onBlur={() => handleTimeBlur('minute')}
+                                    placeholder="00"
+                                />
+                            </div>
                             <ToggleGroup
                                 type="single"
                                 size="sm"
@@ -172,8 +174,13 @@ const TodoItem = ({todo, onDelete, onEdit, onDone, onHandleTime, color} : TodoIt
                             </ToggleGroup>
                         </PopoverContent>
                     </Popover>
-                    <Minus size={16} color="gray"
-                           onClick={() => onDelete(todo.id)}/>
+                    <CalendarArrowUp
+                        className="mr-2" size={16} color="gray"
+                    />
+                    <Minus
+                        className=""
+                        size={16} color="gray"
+                        onClick={() => onDelete(todo.id)}/>
                 </div>
             </div>
         </div>
