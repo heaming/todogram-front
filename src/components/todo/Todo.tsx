@@ -172,12 +172,7 @@ const Todo = ({ selectedDate }: TodoProps) => {
     }, []);
 
     return (
-        <div className="w-[400px]">
-            {/*<div className="flex justify-end mr-2">*/}
-            {/*    <Ellipsis*/}
-            {/*        size={18}*/}
-            {/*        className="rounded-full border-1 border-gray-500 p-1 text-zinc-500 hover:bg-gray-500 hover:text-white cursor-pointer"/>*/}
-            {/*</div>*/}
+        <div className="w-[350px]">
             <CategoryList
                 categories={categories}
                 onClick={handleCategory}
