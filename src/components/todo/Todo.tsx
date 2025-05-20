@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import CategoryList from "@/components/todo/CategoryList";
-import TodoList from "@/components/todo/TodoList";
+import CategoryList from "@/components/todo/category/CategoryList";
+import TodoList from "@/components/todo/todo/TodoList";
 import dayjs from "dayjs";
 import type {Todo, Category} from "@/models/todo";
 import {generateKeyBetween} from 'fractional-indexing';
+import CategorySetting from "@/components/todo/category/CategorySetting";
 
 require('dayjs/locale/ko');
 dayjs().locale('ko');
@@ -12,11 +13,43 @@ interface TodoProps {
     selectedDate: Date | undefined;
 }
 
+const initialCategory: Category = {
+    color: "#00BC7DFF",
+    content: "내 카테고리",
+    createdAt: "",
+    deletedAt: "",
+    id: "",
+    sort: generateKeyBetween(null, null),
+    userId: ""
+}
+
 const Todo = ({ selectedDate }: TodoProps) => {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [todosColor, setTodosColor] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+
+    const fetchCategories = async () => {
+        if (typeof window !== 'undefined' && window.api) {
+            try {
+                const categories: Category[] = await window.api.getCategories('');
+                if (!categories || categories.length <= 0) {
+                    const initial = await window.api.addCategory(initialCategory);
+                    categories.push(initial);
+                }
+
+                setCategories(categories);
+                setTodosColor(categories.length > 0 ? categories[0].color : '#166534');
+                if (categories && categories.length > 0) {
+                    setSelectedCategory(categories[0].id);
+                }
+            } catch (e) {
+                console.log('Failed to get Categories', e);
+            }
+        } else {
+            console.error('window.api is not available');
+        }
+    };
 
     const getTodos = async (categoryId: string, date: string) => {
         try {
@@ -66,8 +99,6 @@ const Todo = ({ selectedDate }: TodoProps) => {
             status: false,
         }
 
-
-        console.log(request);
         try {
             const newTodo = await window.api.addTodo(request);
             return newTodo;
@@ -131,9 +162,79 @@ const Todo = ({ selectedDate }: TodoProps) => {
         )
     }
 
-    const handleCategory = (id: string) => {
+    const handleSelectedCategory = (id: string) => {
         setSelectedCategory(id);
         setTodosColor(categories.filter(x => x.id === id)[0].color);
+    }
+
+    const handleCategorySort = (id: string, sort: string) => {
+        setCategories((prev) =>
+            prev.map(category => {
+                    const isChangedCategory = category.id === id;
+                    if (isChangedCategory) {
+                        try {
+                            window.api.updateCategory(id, {...category, sort: sort })
+                        } catch (e) {
+                            console.log(e);
+                        }
+                        return {...category, sort: sort };
+                    }
+                    return category;
+                }
+            )
+        )
+    }
+
+    const handleCategoryContent = async (id: string, content: string) => {
+        setCategories((prev) =>
+            prev.map(category => {
+                    const isChangedCategory = category.id === id;
+                    if (isChangedCategory) {
+                        try {
+                            window.api.updateCategoryContent(id, content)
+                        } catch (e) {
+                            console.log(e);
+                        }
+                        return {...category, content: content };
+                    }
+                    return category;
+                }
+            )
+        )
+    }
+
+    const handleAddCategory = async (content: string) => {
+        const generateSort = () => {
+            if (categories && categories.length > 0) {
+                return generateKeyBetween(categories[categories.length-1].sort, null);
+            } else {
+                return generateKeyBetween(null, null);
+            }
+        }
+        const sort = generateSort();
+
+        const request: Category = {
+            color: "#00BC7DFF",
+            content: content,
+            createdAt: "",
+            deletedAt: "",
+            id: "",
+            sort: sort,
+            userId: ""
+        }
+        try {
+            const newCategory = await window.api.addCategory(request);
+            setCategories(prev => [...prev, newCategory]);
+        } catch (e) {
+            console.log('Failed to update category content');
+        }
+    }
+
+    const handleCategorySettingPopover = async () => {
+        console.log("ddddd")
+        setTimeout(() => {
+            fetchCategories(); // or onOpen()
+        }, 100);
     }
 
     useEffect(() => {
@@ -146,36 +247,23 @@ const Todo = ({ selectedDate }: TodoProps) => {
         fetchTodos();
     }, [selectedDate, selectedCategory]);
 
-    useEffect(() => {
-
-    }, [categories]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            if (typeof window !== 'undefined' && window.api) {
-                try {
-                    const categories: Category[] = await window.api.getCategories('');
-                    setCategories(categories);
-                    setTodosColor(categories.length > 0 ? categories[0].color : '#f06292');
-                    if (categories && categories.length > 0) {
-                        setSelectedCategory(categories[0].id);
-                    }
-                } catch (e) {
-                    console.log('Failed to get Categories', e);
-                }
-            } else {
-                console.error('window.api is not available');
-            }
-        };
-
         fetchCategories();
     }, []);
 
     return (
         <div className="w-[350px]">
+            <CategorySetting
+                categories={categories}
+                onChangeCategorySort={handleCategorySort}
+                onChangeCategoryContent={handleCategoryContent}
+                onAddCategory={handleAddCategory}
+                onOpen={handleCategorySettingPopover}
+            />
             <CategoryList
                 categories={categories}
-                onClick={handleCategory}
+                onClick={handleSelectedCategory}
             />
             <TodoList
                 todos={todos}

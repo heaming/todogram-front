@@ -33,7 +33,6 @@ export default function Home() {
                     <Calendar onSelectDate={handleSelectDate}/>
                 </div>
                 <div>
-                    <div>설정</div>
                     <div className="rounded-xl bg-zinc-100/30 p-3">
                         <Todo selectedDate={selectedDate}/>
                     </div>
