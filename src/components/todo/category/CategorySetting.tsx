@@ -1,6 +1,5 @@
 import {Circle, Menu, Plus, SettingsIcon, Square} from "lucide-react";
-import {useEffect, useState} from "react";
-import {CSS} from '@dnd-kit/utilities';
+import {useEffect, useRef, useState} from "react";
 import type {Category} from "@/models/todo";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
@@ -22,6 +21,7 @@ import {
 } from "@dnd-kit/sortable";
 import {generateKeyBetween} from "fractional-indexing";
 import CategorySortItem from "@/components/todo/category/CategorySortItem";
+import {debounce} from "lodash";
 
 interface CategorySettingProps {
     categories: Category[];
@@ -33,17 +33,7 @@ interface CategorySettingProps {
 
 const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryContent, onAddCategory, onOpen}: CategorySettingProps) => {
     const [items, setItems] = useState<Category[]>([]);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const handleIsPopoverOpen = (isOpen: boolean) => {
-        setIsPopoverOpen(isOpen);
-
-        if (!isOpen) {
-            setTimeout(() => {
-                onOpen();
-            }, 200);
-        }
-    };
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -51,7 +41,7 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
         })
     );
 
-    const generateSort = (newIndex: number) => {
+    const generateSort = (items: Category[], newIndex: number): string | null => {
         if (!items || items.length === 0) {
             return generateKeyBetween(null, null);
         }
@@ -62,8 +52,25 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
         const prevSort = prevItem?.sort ?? null;
         const nextSort = nextItem?.sort ?? null;
 
-        return generateKeyBetween(prevSort, nextSort);
-    }
+        if (prevSort === null && nextSort === null) {
+            return generateKeyBetween(null, null);
+        }
+        if (prevSort === null) {
+            return generateKeyBetween(null, nextSort);
+        }
+        if (nextSort === null) {
+            return generateKeyBetween(prevSort, null);
+        }
+        if (prevSort === nextSort) {
+            return null;
+        }
+        if (prevSort < nextSort) {
+            return generateKeyBetween(prevSort, nextSort);
+        }
+
+        return null;
+    };
+
 
     const onClickAddCategory = () => {
         if (items && items.length > 0 && items.filter(item => item.id === '').length > 0) return;
@@ -100,31 +107,49 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
         )
     }
 
-    const handleCategoryContent = (id: string|undefined|'', content: string) => {
+    const handleCategoryContent = async (id: string | undefined | '', content: string) => {
         if (!content || content === '') return;
 
         if (id && id.length > 0) {
-            onChangeCategoryContent(id, content);
+            await onChangeCategoryContent(id, content);
         } else {
-            onAddCategory(content);
+            await onAddCategory(content);
         }
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
+
         if (active?.id && over?.id && active.id !== over.id) {
             setItems((prevItems) => {
-                const changedItem = items.filter(item => item.id === active.id)[0];
-                const oldIndex = prevItems.findIndex(item => item.id === active.id);
-                const newIndex = prevItems.findIndex(item => item.id === over.id);
-                const sort = generateSort(newIndex);
+                const oldIndex = prevItems.findIndex((item) => item.id === active.id);
+                const newIndex = prevItems.findIndex((item) => item.id === over.id);
+                const changedItem = prevItems[oldIndex];
 
-                onChangeCategorySort(changedItem.id, sort);
+                const newSort = generateSort(prevItems, newIndex);
+
+                if (!changedItem) return prevItems;
+                if (!newSort) return prevItems;
+
+                onChangeCategorySort(changedItem.id, newSort);
 
                 return arrayMove(prevItems, oldIndex, newIndex);
             });
         }
     };
+
+    const debouncedDrag = useRef(
+        debounce((event: DragEndEvent) => {
+            console.log("dd")
+            handleDragEnd(event);
+        }, 300)
+    ).current;
+
+    useEffect(() => {
+        return () => {
+            debouncedDrag.cancel();
+        };
+    }, [debouncedDrag]);
 
     useEffect(() => {
         if (!categories || categories.length === 0) return;
@@ -134,9 +159,10 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
     return (
         <DndContext>
             <Popover
-                open={isPopoverOpen}
-                onOpenChange={(isOpen) => handleIsPopoverOpen(isOpen)}
-            >
+                onOpenChange={(open) => {
+                    if (!open) onOpen();
+                }}
+                >
                 <PopoverTrigger asChild>
                     <SettingsIcon/>
                 </PopoverTrigger >

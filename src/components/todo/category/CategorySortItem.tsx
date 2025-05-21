@@ -77,9 +77,16 @@ const CategorySortItem = ({id, content, color, onBlurCategoryContent, onChangeCa
 
                 <div className="text-sm flex items-center">
                     <input
+                        placeholder={"엔터로 저장"}
                         maxLength={10}
                         className="w-full"
                         value={newContent}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                onBlurCategoryContent(id, newContent);
+                            }
+                        }}
                         onChange={(e) => setNewContent(e.target.value)}
                         onBlur={(e) => {
                             e.preventDefault();

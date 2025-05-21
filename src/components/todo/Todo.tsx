@@ -167,40 +167,32 @@ const Todo = ({ selectedDate }: TodoProps) => {
         setTodosColor(categories.filter(x => x.id === id)[0].color);
     }
 
-    const handleCategorySort = (id: string, sort: string) => {
-        setCategories((prev) =>
-            prev.map(category => {
-                    const isChangedCategory = category.id === id;
-                    if (isChangedCategory) {
-                        try {
-                            window.api.updateCategory(id, {...category, sort: sort })
-                        } catch (e) {
-                            console.log(e);
-                        }
-                        return {...category, sort: sort };
-                    }
-                    return category;
-                }
-            )
-        )
+    const handleCategorySort = async (id: string, sort: string) => {
+        try {
+            const category = categories.filter(item => item.id === id)[0];
+            if(category) {
+                await window.api.updateCategory(id, {...category, sort: sort })
+            }
+        }  catch (e) {
+            console.log(e);
+        }
     }
 
     const handleCategoryContent = async (id: string, content: string) => {
+        try {
+            await window.api.updateCategoryContent(id, content);
+        } catch (e) {
+            console.log(e);
+        }
+
         setCategories((prev) =>
             prev.map(category => {
-                    const isChangedCategory = category.id === id;
-                    if (isChangedCategory) {
-                        try {
-                            window.api.updateCategoryContent(id, content)
-                        } catch (e) {
-                            console.log(e);
-                        }
-                        return {...category, content: content };
-                    }
-                    return category;
+                if (category.id === id) {
+                    return { ...category, content };
                 }
-            )
-        )
+                return category;
+            })
+        );
     }
 
     const handleAddCategory = async (content: string) => {
@@ -231,10 +223,7 @@ const Todo = ({ selectedDate }: TodoProps) => {
     }
 
     const handleCategorySettingPopover = async () => {
-        console.log("ddddd")
-        setTimeout(() => {
-            fetchCategories(); // or onOpen()
-        }, 100);
+        await fetchCategories();
     }
 
     useEffect(() => {
