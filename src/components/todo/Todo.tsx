@@ -243,6 +243,7 @@ const Todo = ({ selectedDate }: TodoProps) => {
 
     return (
         <div className="w-[350px]">
+            <div className="flex items-center align-middle justify-end pr-2">
             <CategorySetting
                 categories={categories}
                 onChangeCategorySort={handleCategorySort}
@@ -250,6 +251,7 @@ const Todo = ({ selectedDate }: TodoProps) => {
                 onAddCategory={handleAddCategory}
                 onOpen={handleCategorySettingPopover}
             />
+            </div>
             <CategoryList
                 categories={categories}
                 onClick={handleSelectedCategory}

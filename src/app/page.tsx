@@ -27,17 +27,14 @@ export default function Home() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center gap-4 p-4 pt-0">
+        <div className="flex min-h-[700px] max-h-[500px] items-center justify-center gap-4 p-4 pt-0 mt-8">
             <div className="grid auto-rows-min gap-4 md:grid-cols-2">
                 <div className="rounded-xl bg-white">
                     <Calendar onSelectDate={handleSelectDate}/>
                 </div>
-                <div>
-                    <div className="rounded-xl bg-zinc-100/30 p-3">
-                        <Todo selectedDate={selectedDate}/>
-                    </div>
+                <div className="rounded-xl bg-white p-3">
+                    <Todo selectedDate={selectedDate}/>
                 </div>
-
             </div>
         </div>
     );

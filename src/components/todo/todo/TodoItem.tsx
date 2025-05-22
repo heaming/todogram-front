@@ -125,13 +125,13 @@ const TodoItem = ({todo, onDelete, onEdit, onDone, onHandleTime, color} : TodoIt
                         open={isTimerOpen}
                         onOpenChange={handleTimerChange}
                     >
-                        <PopoverTrigger asChild>
-                            <Clock3
-                                className="mr-2"
-                                size={16} color="gray"
-                                onClick={() => setIsTimerOpen((prev) => !prev)}
-                            />
-                        </PopoverTrigger>
+                        {/*<PopoverTrigger asChild>*/}
+                        {/*    <Clock3*/}
+                        {/*        className="mr-2"*/}
+                        {/*        size={16} color="gray"*/}
+                        {/*        onClick={() => setIsTimerOpen((prev) => !prev)}*/}
+                        {/*    />*/}
+                        {/*</PopoverTrigger>*/}
                         <PopoverContent
                             side="bottom"
                             className="bg-white w-[120px] border border-gray-200 shadow-md rounded-md p-1 z-50 flex items-center gap-1"
@@ -174,9 +174,9 @@ const TodoItem = ({todo, onDelete, onEdit, onDone, onHandleTime, color} : TodoIt
                             </ToggleGroup>
                         </PopoverContent>
                     </Popover>
-                    <CalendarArrowUp
-                        className="mr-2" size={16} color="gray"
-                    />
+                    {/*<CalendarArrowUp*/}
+                    {/*    className="mr-2" size={16} color="gray"*/}
+                    {/*/>*/}
                     <Minus
                         className=""
                         size={16} color="gray"

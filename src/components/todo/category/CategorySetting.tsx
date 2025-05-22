@@ -187,8 +187,12 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
                 }}
                 >
                 <PopoverTrigger asChild>
-                    <SettingsIcon/>
-                </PopoverTrigger >
+                    <button className="text-zinc-400 rounded-sm cursor-pointer flex justify-center items-center">
+                    <SettingsIcon className="mt-1"
+                                  size={17}/>
+                        {/*<span className="text-xs font-light pl-1">카테고리 설정</span>*/}
+                    </button>
+                </PopoverTrigger>
                 <PopoverContent className="w-56 bg-white border-zinc-100">
                     <div className="grid gap-4 mb-2">
                         <div className="flex justify-between text-zinc-500 align-middle">
