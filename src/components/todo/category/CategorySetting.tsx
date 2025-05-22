@@ -22,6 +22,7 @@ import {
 import {generateKeyBetween} from "fractional-indexing";
 import CategorySortItem from "@/components/todo/category/CategorySortItem";
 import {debounce} from "lodash";
+import {toast} from "sonner";
 
 interface CategorySettingProps {
     categories: Category[];
@@ -71,7 +72,6 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
         return null;
     };
 
-
     const onClickAddCategory = () => {
         if (items && items.length > 0 && items.filter(item => item.id === '').length > 0) return;
 
@@ -85,6 +85,30 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
             userId: ""
         }
         setItems([...items, newCategroy]);
+    }
+
+    const handleDelete = async (id: string) => {
+        if (!id || id === '') return;
+        if (items.length <= 1) {
+            toast("최소 1개 이상의 카테고리가 필요합니다.", {
+                description: "",
+                action: {
+                    label: `확인`,
+                    onClick: () => { return; },
+                },
+                position: 'top-right',
+                className: 'bg-white border-1 border-zinc-300 text-zinc-700',
+            });
+            return;
+        }
+
+        setItems((prev) => prev.filter(category => category.id !== id));
+
+        try {
+            await window.api.deleteCategory(id);
+        } catch (error) {
+            console.log("Failed to remove category", error);
+        }
     }
 
     const handleCategoryColor = async (id: string, color: string) => {
@@ -140,9 +164,8 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
 
     const debouncedDrag = useRef(
         debounce((event: DragEndEvent) => {
-            console.log("dd")
             handleDragEnd(event);
-        }, 300)
+        }, 500)
     ).current;
 
     useEffect(() => {
@@ -199,6 +222,7 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
                                         color={category.color}
                                         onBlurCategoryContent={handleCategoryContent}
                                         onChangeCategoryColor={handleCategoryColor}
+                                        onDeleteCategory={handleDelete}
                                     />
                                 </div>
                             ))}

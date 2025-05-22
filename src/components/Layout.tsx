@@ -7,6 +7,7 @@ import {Separator} from "@/components/ui/separator";
 import {cn} from "@/lib/utils";
 import LayoutWithSidebar from "@/components/layout/sidebar/SidebarLayout";
 import SidebarLayout from "@/components/layout/sidebar/SidebarLayout";
+import {Toaster} from "@/components/ui/sonner";
 
 interface LayoutProps {
     children: ReactNode;
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SidebarProvider>
             <SidebarLayout>
                 {children}
+                <Toaster />
             </SidebarLayout>
         </SidebarProvider>
     );

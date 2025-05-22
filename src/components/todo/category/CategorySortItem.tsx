@@ -3,6 +3,15 @@ import {CSS} from "@dnd-kit/utilities";
 import {CircleX, Menu, Minus, Square, Trash} from "lucide-react";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {useEffect, useState} from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const categoryColors = [
     '#00BC7DFF',
@@ -23,9 +32,10 @@ interface CategorySortItemProps {
     color: string;
     onBlurCategoryContent: (id: string | undefined | "", content: string) => void;
     onChangeCategoryColor: (id: string, color: string) => void;
+    onDeleteCategory: (id: string) => void;
 }
 
-const CategorySortItem = ({id, content, color, onBlurCategoryContent, onChangeCategoryColor}: CategorySortItemProps)=> {
+const CategorySortItem = ({id, content, color, onBlurCategoryContent, onChangeCategoryColor, onDeleteCategory}: CategorySortItemProps)=> {
     const {
         attributes,
         listeners,
@@ -39,6 +49,7 @@ const CategorySortItem = ({id, content, color, onBlurCategoryContent, onChangeCa
     const [newContent, setNewContent] = useState(content);
     const [newColor, setNewColor] = useState(color);
     const [colorPopoverOpen, setColorPopoverOpen] = useState(false);
+    const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
     const [colorButtonDisabled, setColorButtonDisabled] = useState(!id || id.length <= 0 || newContent.length <= 0 || content.length <= 0);
 
     const handleColorPopoverOpen = (isOpen: boolean) => {
@@ -133,12 +144,49 @@ const CategorySortItem = ({id, content, color, onBlurCategoryContent, onChangeCa
                     </div>
                 </PopoverContent>
             </Popover>
-            <button
-                disabled={colorButtonDisabled}
-                className="cursor-pointer mt-0.5 flex items-center justify-center h-4 w-4 disabled:opacity-50 disabled:cursor-default"
-            >
-                <CircleX color={'#fb7185'} strokeWidth={2} size={16}/>
-            </button>
+            {
+                id && id.trim().length > 0 &&
+                <AlertDialog
+                    open={deleteAlertOpen}
+                    onOpenChange={setDeleteAlertOpen}
+                >
+                    <AlertDialogTrigger asChild>
+                        <button
+                            disabled={colorButtonDisabled}
+                            className="cursor-pointer mt-0.5 flex items-center justify-center h-4 w-4 disabled:opacity-50 disabled:cursor-default"
+                        >
+                            <CircleX color={'#fb7185'} strokeWidth={2} size={16}/>
+                        </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="w-95 bg-white border-zinc-100">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle
+                                className="font-medium text-zinc-800 text-lg"
+                            >정말로 카테고리를 삭제하시겠습니까?🤔</AlertDialogTitle>
+                            <AlertDialogDescription
+                                className="text-sm text-zinc-500"
+                            >
+                                카테고리 내 모든 할 일이 사라지고, 복원할 수 없습니다.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                className="text-sm text-zinc-500 border-zinc-300 border-1 hover:text-zinc-700 cursor-pointer"
+                            >취소</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="text-sm border-[#e57373] border-1 hover:text-[#e57373] cursor-pointer"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    onDeleteCategory(id);
+                                    setDeleteAlertOpen(false);
+                                }}
+                            >삭제
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            }
+
         </div>
     );
 }
