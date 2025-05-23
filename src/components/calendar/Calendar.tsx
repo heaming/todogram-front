@@ -9,6 +9,7 @@ import {clsx} from "clsx";
 interface CalendarProps {
     onLoad: (type: loadingType, loading: boolean) => void;
     onSelectDate: (date: Date) => void;
+    onDone: boolean | null;
 }
 
 const TodogramDayButton = (props) => {
@@ -25,7 +26,7 @@ const TodogramDayButton = (props) => {
     );
 };
 
-export const Calendar = ({ onSelectDate, onLoad }: CalendarProps ) =>  {
+export const Calendar = ({ onSelectDate, onLoad, onDone }: CalendarProps ) =>  {
     const [selected, setSelected] = useState<Date>(new Date());
     const [isLoading, setIsLoading] = useState(true);
     const [allDoneDates, setAllDoneDates] = useState<Date[]>([]);
@@ -33,6 +34,14 @@ export const Calendar = ({ onSelectDate, onLoad }: CalendarProps ) =>  {
     const onSelect = () => {
         onSelectDate(selected || new Date);
     }
+
+    const handleSelect = (date: Date | undefined) => {
+        if (!date) return;
+        if (selected && isSameDay(date, selected)) return;
+
+        setSelected(date);
+        onSelectDate(date);
+    };
 
     const convertToDate = (dates: string[]) => {
         if (!dates || dates.length <= 0) return [];
@@ -84,18 +93,34 @@ export const Calendar = ({ onSelectDate, onLoad }: CalendarProps ) =>  {
         onLoad('calendar', isLoading);
     }, [isLoading]);
 
+    useEffect(() => {
+        if (onDone === null) return;
+        if (onDone) {
+            setAllDoneDates(prev => {
+                if (prev.some(d => isSameDay(d, selected))) return prev;
+                return [...prev, selected];
+            });
+        } else {
+            setAllDoneDates(prev => prev.filter(d => !isSameDay(d, selected)));
+        }
+    }, [onDone]);
+
     return (
         <div className="pl-8 py-2">
             <DayPicker
                 locale={ko}
                 mode="single"
                 selected={selected}
-                onSelect={setSelected}
+                onSelect={handleSelect}
                 showOutsideDays
                 modifiers={modifiers}
                 modifiersClassNames={modifiersClassNames}
                 components={{
                     DayButton: TodogramDayButton,
+                }}
+                onMonthChange={(month) => {
+                    const selectedYM = dayjs(month).format('YYYYMM');
+                    fetchData(selectedYM);
                 }}
             />
         </div>

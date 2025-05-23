@@ -16,7 +16,8 @@ export default function Home() {
     const [selectedDate, setSelectedDate] = useState<Date>();
     const [isCalendarLoading, setIsCalendarLoading] = useState(true);
     const [isTodoLoading, setIsTodoLoading] = useState(true);
-    const [isLoadingAll, setIsLoadingAll] =useState(true);
+    const [isLoadingAll, setIsLoadingAll] = useState(true);
+    const [selectedDateIsDone, setSelectedDateIsDone] = useState(null);
 
     useEffect(() => {
         if (!isCalendarLoading && !isTodoLoading) setIsLoadingAll(false);
@@ -34,11 +35,15 @@ export default function Home() {
         setSelectedDate(date);
     }
 
+    const handleAllDone = (allDone: boolean) => {
+        setSelectedDateIsDone(allDone);
+    }
+
     return (
         <div className="flex min-h-[700px] max-h-[500px] items-center justify-center gap-4 p-4 pt-0 mt-8">
             <div className="grid auto-rows-min gap-10 md:grid-cols-2">
                 <div className={`rounded-xl bg-white border-zinc-100 border-1 shadow-md ${isLoadingAll ? 'hidden' : ''}`}>
-                    <Calendar onLoad={handleLoading} onSelectDate={handleSelectDate}/>
+                    <Calendar onLoad={handleLoading} onSelectDate={handleSelectDate} onDone={selectedDateIsDone}/>
                 </div>
                 {isLoadingAll &&
                     (<>
@@ -51,7 +56,7 @@ export default function Home() {
                     </>)
                 }
                 <div className={`rounded-xl bg-white p-3 border-zinc-100 border-1 shadow-md ${isLoadingAll ? 'hidden' : ''}`}>
-                    <Todo selectedDate={selectedDate} onLoad={handleLoading}/>
+                    <Todo selectedDate={selectedDate} onLoad={handleLoading} onDone={handleAllDone}/>
                 </div>
             </div>
         </div>

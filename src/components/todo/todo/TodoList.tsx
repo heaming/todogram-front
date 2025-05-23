@@ -66,7 +66,7 @@ const TodoList = ({ todos, onDelete, onEdit, onAdd, onDone, onHandleTime, color 
                     />
                     <input
                         spellCheck={false}
-                        className={`outline-none border-1 w-[250px] border-transparent focus:border-b border-dotted text-sm font-medium`}
+                        className={`placeholder-zinc-300 outline-none border-1 w-[250px] border-transparent focus:border-b border-dotted text-sm font-medium`}
                         type="text"
                         onFocus={(e) => (e.currentTarget.style.borderBottomColor = color)}
                         onBlur={(e) => (e.currentTarget.style.borderBottomColor = 'transparent')}

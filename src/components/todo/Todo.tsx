@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import CategoryList from "@/components/todo/category/CategoryList";
 import TodoList from "@/components/todo/todo/TodoList";
 import dayjs from "dayjs";
@@ -7,6 +7,7 @@ import {generateKeyBetween} from 'fractional-indexing';
 import CategorySetting from "@/components/todo/category/CategorySetting";
 import {loadingType} from "@/app/page";
 import TodoSkeleton from "@/components/skeleton/TodoSkeleton";
+import {toast} from "sonner";
 
 require('dayjs/locale/ko');
 dayjs().locale('ko');
@@ -14,6 +15,7 @@ dayjs().locale('ko');
 interface TodoProps {
     onLoad: (type: loadingType, loading: boolean) => void;
     selectedDate: Date | undefined;
+    onDone: (allDone: boolean) => void
 }
 
 const initialCategory: Category = {
@@ -25,13 +27,41 @@ const initialCategory: Category = {
     sort: generateKeyBetween(null, null),
     userId: ""
 }
+const messages = [
+    "할일 끝! 내 능력치가 +10 올랐어요! 🆙",
+    "미션 컴플리트! 상금은? 내 기분! 🏆",
+    "끝냈어요! 이제 침대가 날 기다려요! 🛋️",
+    "할일 클리어! 이젠 냉장고 탐험 타임! 🥪",
+    "오늘의 할일: ✔️ 내일은? 음… 생각 안 해요! 🤷‍♂️",
+    "전설이 됐어요! 이제 전설적인 휴식을… 🦸",
+    "모든 할일 해냈다! 당신, 진짜 사람 맞나? 🤖",
+    "클리어! 축하합니다, 당신은 슈퍼히어로! 🦸‍♀️",
+    "할일 다 끝냈으니, 뇌도 휴식! 🧠💤",
+    "오늘은 끝! 내일은… 내일 생각해! 💤",
+    "할일 다 끝났어요! 뿌듯해요! 😊",
+    "오늘도 해냈다! 이제 커피 한잔? ☕️",
+    "다 했으니 게임 한 판 할 시간! 🎮",
+    "완료! 이 기세로 내일도 화이팅! 💪",
+    "할일 끝! 오늘도 내가 최고! 👑",
+    "와우! 다 끝났어요! 축하 파티 준비! 🎉",
+    "끝냈다! 이제 휴식 모드 ON! 🛌",
+    "다 했다니! 내일도 같이 달려요! 🚀",
+    "할일 완료! 이제 영화 볼 시간! 🍿",
+    "모든 게 끝났다! 당신은 슈퍼히어로?! 🦸‍♂️"
+];
 
-const Todo = ({ selectedDate, onLoad }: TodoProps) => {
+const getRandomMessage = () => {
+    const idx = Math.floor(Math.random() * messages.length);
+    return messages[idx];
+}
+
+const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
     const [isLoading, setIsLoading] = useState(true);
     const [todos, setTodos] = useState<Todo[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [todosColor, setTodosColor] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const toastShownRef = useRef(false);
 
     const fetchCategories = async () => {
         setIsLoading(true);
@@ -233,6 +263,27 @@ const Todo = ({ selectedDate, onLoad }: TodoProps) => {
         await fetchCategories();
     }
 
+    const checkAllDone = () => {
+        const allDone = todos.every(todo => todo.status === true);
+        if (allDone && !toastShownRef.current) {
+            toast(getRandomMessage(), {
+                duration: 2000,
+                description: "",
+                action: {
+                    label: `확인`,
+                    onClick: () => { return; },
+                },
+                position: 'top-right',
+                className: 'bg-white border-1 border-zinc-300 text-zinc-700',
+            });
+            onDone(true);
+            toastShownRef.current = true;
+        } else if (!allDone) {
+            toastShownRef.current = false;
+            onDone(false);
+        }
+    };
+
     useEffect(() => {
         const fetchTodos = async () => {
             const _date = dayjs(selectedDate).format('YYYYMMDD');
@@ -251,6 +302,10 @@ const Todo = ({ selectedDate, onLoad }: TodoProps) => {
     useEffect(() => {
         onLoad('todo', isLoading);
     }, [isLoading]);
+
+    useEffect(() => {
+        checkAllDone();
+    }, [todos]);
 
     return (
         <div className="w-[350px]">
