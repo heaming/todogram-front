@@ -1,23 +1,17 @@
 import {Day, DayButton, DayPicker} from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import {useEffect, useState} from 'react';
-import {Circle} from "lucide-react";
 import {ko} from "date-fns/locale";
-
-const todoData: Record<string, { total: number; done: number }> = {
-    '2025-05-06': { total: 10, done: 3 },
-    '2025-05-07': { total: 10, done: 7 },
-    '2025-05-09': { total: 10, done: 10 },
-    '2025-05-10': { total: 10, done: 2 },
-    '2025-05-11': { total: 10, done: 10 },
-};
+import {loadingType} from "@/app/page";
 
 interface CalendarProps {
+    onLoad: (type: loadingType, loading: boolean) => void;
     onSelectDate: (date: Date) => void;
 }
 
-export const Calendar = ({ onSelectDate }: CalendarProps ) =>  {
+export const Calendar = ({ onSelectDate, onLoad }: CalendarProps ) =>  {
     const [selected, setSelected] = useState<Date>();
+    const [isLoading, setIsLoading] = useState(true);
 
     const onSelect = () => {
         onSelectDate(selected || new Date);
@@ -27,13 +21,33 @@ export const Calendar = ({ onSelectDate }: CalendarProps ) =>  {
         onSelect();
     }, [selected]);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+
+            } catch (e) {
+                console.log("failed to fetch calendar");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        onLoad('calendar', isLoading);
+    }, [isLoading]);
+
     return (
-        <DayPicker
-            locale={ko}
-            mode="single"
-            selected={selected}
-            onSelect={setSelected}
-            showOutsideDays
-        />
+        <div className="pl-8 py-2">
+            <DayPicker
+                locale={ko}
+                mode="single"
+                selected={selected}
+                onSelect={setSelected}
+                showOutsideDays
+            />
+        </div>
     );
 }

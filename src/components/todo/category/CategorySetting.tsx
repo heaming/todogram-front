@@ -165,7 +165,7 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
     const debouncedDrag = useRef(
         debounce((event: DragEndEvent) => {
             handleDragEnd(event);
-        }, 500)
+        }, 300)
     ).current;
 
     useEffect(() => {
@@ -187,7 +187,7 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
                 }}
                 >
                 <PopoverTrigger asChild>
-                    <button className="text-zinc-400 rounded-sm cursor-pointer flex justify-center items-center">
+                    <button className="mr-4 text-zinc-400 rounded-sm cursor-pointer flex justify-center items-center mb-2">
                     <SettingsIcon className="mt-1"
                                   size={17}/>
                         {/*<span className="text-xs font-light pl-1">카테고리 설정</span>*/}

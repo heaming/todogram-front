@@ -5,11 +5,14 @@ import dayjs from "dayjs";
 import type {Todo, Category} from "@/models/todo";
 import {generateKeyBetween} from 'fractional-indexing';
 import CategorySetting from "@/components/todo/category/CategorySetting";
+import {loadingType} from "@/app/page";
+import TodoSkeleton from "@/components/skeleton/TodoSkeleton";
 
 require('dayjs/locale/ko');
 dayjs().locale('ko');
 
 interface TodoProps {
+    onLoad: (type: loadingType, loading: boolean) => void;
     selectedDate: Date | undefined;
 }
 
@@ -23,13 +26,15 @@ const initialCategory: Category = {
     userId: ""
 }
 
-const Todo = ({ selectedDate }: TodoProps) => {
+const Todo = ({ selectedDate, onLoad }: TodoProps) => {
+    const [isLoading, setIsLoading] = useState(true);
     const [todos, setTodos] = useState<Todo[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [todosColor, setTodosColor] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
 
     const fetchCategories = async () => {
+        setIsLoading(true);
         if (typeof window !== 'undefined' && window.api) {
             try {
                 const categories: Category[] = await window.api.getCategories('');
@@ -45,6 +50,8 @@ const Todo = ({ selectedDate }: TodoProps) => {
                 }
             } catch (e) {
                 console.log('Failed to get Categories', e);
+            } finally {
+                setIsLoading(false);
             }
         } else {
             console.error('window.api is not available');
@@ -241,9 +248,19 @@ const Todo = ({ selectedDate }: TodoProps) => {
         fetchCategories();
     }, []);
 
+    useEffect(() => {
+        onLoad('todo', isLoading);
+    }, [isLoading]);
+
     return (
         <div className="w-[350px]">
-            <div className="flex items-center align-middle justify-end pr-2">
+            <div className="flex items-center justify-center">
+            <div className="flex-1 min-w-0 pr-3">
+                <CategoryList
+                    categories={categories}
+                    onClick={handleSelectedCategory}
+                />
+            </div>
             <CategorySetting
                 categories={categories}
                 onChangeCategorySort={handleCategorySort}
@@ -251,22 +268,17 @@ const Todo = ({ selectedDate }: TodoProps) => {
                 onAddCategory={handleAddCategory}
                 onOpen={handleCategorySettingPopover}
             />
-            </div>
-            <CategoryList
-                categories={categories}
-                onClick={handleSelectedCategory}
-            />
-            <TodoList
-                todos={todos}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-                onAdd={handleAdd}
-                onDone={handleState}
-                onHandleTime={handleTime}
-                color={todosColor}
-            />
         </div>
-    );
+        <TodoList
+            todos={todos}
+             onDelete={handleDelete}
+             onEdit={handleEdit}
+             onAdd={handleAdd}
+             onDone={handleState}
+             onHandleTime={handleTime}
+             color={todosColor}/>
+        </div>
+            )
 };
 
 export default Todo;

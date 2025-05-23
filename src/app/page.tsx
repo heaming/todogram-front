@@ -1,26 +1,34 @@
 'use client';
 
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {Calendar} from "@/components/calendar/Calendar";
 import Todo from "@/components/todo/Todo";
-import {Button} from "@/components/ui/button";
-import {Ellipsis} from "lucide-react";
 import dayjs from "dayjs";
-import {SidebarTrigger} from "@/components/ui/sidebar";
+import TodoSkeleton from "@/components/skeleton/TodoSkeleton";
+import CalendarSkeleton from "@/components/skeleton/CalendarSkeleton";
 
 require('dayjs/locale/ko');
 dayjs().locale('ko');
 
+export type loadingType = 'calendar' | 'todo';
+
 export default function Home() {
     const [selectedDate, setSelectedDate] = useState<Date>();
+    const [isCalendarLoading, setIsCalendarLoading] = useState(true);
+    const [isTodoLoading, setIsTodoLoading] = useState(true);
+    const [isLoadingAll, setIsLoadingAll] =useState(true);
 
-    // 더미 유저 프로필 목록
-    const users = [
-        { id: 1, name: "Alice", avatar: "/images/avatar1.jpg" },
-        { id: 2, name: "Bob", avatar: "/images/avatar2.jpg" },
-        { id: 3, name: "Charlie", avatar: "/images/avatar3.jpg" },
-        { id: 4, name: "David", avatar: "/images/avatar4.jpg" },
-    ];
+    useEffect(() => {
+        if (!isCalendarLoading && !isTodoLoading) setIsLoadingAll(false);
+    }, [isCalendarLoading, isTodoLoading]);
+
+    const handleLoading = (type: loadingType, loading: boolean) => {
+        if (type === 'calendar') {
+            setIsCalendarLoading(loading);
+        } else if(type === 'todo') {
+            setIsTodoLoading(loading);
+        }
+    }
 
     const handleSelectDate = (date: Date) => {
         setSelectedDate(date);
@@ -28,12 +36,22 @@ export default function Home() {
 
     return (
         <div className="flex min-h-[700px] max-h-[500px] items-center justify-center gap-4 p-4 pt-0 mt-8">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-                <div className="rounded-xl bg-white">
-                    <Calendar onSelectDate={handleSelectDate}/>
+            <div className="grid auto-rows-min gap-10 md:grid-cols-2">
+                <div className={`rounded-xl bg-white border-zinc-100 border-1 shadow-md ${isLoadingAll ? 'hidden' : ''}`}>
+                    <Calendar onLoad={handleLoading} onSelectDate={handleSelectDate}/>
                 </div>
-                <div className="rounded-xl bg-white p-3">
-                    <Todo selectedDate={selectedDate}/>
+                {isLoadingAll &&
+                    (<>
+                        <div className="rounded-xl bg-white p-3 border-zinc-100 border-1 shadow-md">
+                            <CalendarSkeleton/>
+                        </div>
+                        <div className="rounded-xl bg-white p-3 border-zinc-100 border-1 shadow-md">
+                        <TodoSkeleton/>
+                        </div>
+                    </>)
+                }
+                <div className={`rounded-xl bg-white p-3 border-zinc-100 border-1 shadow-md ${isLoadingAll ? 'hidden' : ''}`}>
+                    <Todo selectedDate={selectedDate} onLoad={handleLoading}/>
                 </div>
             </div>
         </div>

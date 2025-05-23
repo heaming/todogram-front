@@ -36,7 +36,7 @@ const TodoList = ({ todos, onDelete, onEdit, onAdd, onDone, onHandleTime, color 
         <div className="p-3 border-t-1 border-dotted m-1 h-[210px]"
              style={{ borderColor: color }}
         >
-            <ScrollArea className="h-[175px] w-full rounded-md overflow-y-auto">
+            <ScrollArea className="h-[200px] w-full rounded-md overflow-y-auto">
                 <Viewport ref={viewportRef} className="h-full w-full">
                     {!todos || todos.length === 0 ? (
                         <div className="flex items-center justify-center h-full text-gray-400 text-sm">
@@ -65,6 +65,7 @@ const TodoList = ({ todos, onDelete, onEdit, onAdd, onDone, onHandleTime, color 
                         color={color}
                     />
                     <input
+                        spellCheck={false}
                         className={`outline-none border-1 w-[250px] border-transparent focus:border-b border-dotted text-sm font-medium`}
                         type="text"
                         onFocus={(e) => (e.currentTarget.style.borderBottomColor = color)}

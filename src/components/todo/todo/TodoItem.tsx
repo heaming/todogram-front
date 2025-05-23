@@ -112,6 +112,7 @@ const TodoItem = ({todo, onDelete, onEdit, onDone, onHandleTime, color} : TodoIt
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') handleContentBlur();
                         }}
+                        spellCheck={false}
                     />
                 </div>
                 <div className="flex items-center">

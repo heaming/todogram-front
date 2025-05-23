@@ -88,6 +88,7 @@ const CategorySortItem = ({id, content, color, onBlurCategoryContent, onChangeCa
 
                 <div className="text-sm flex items-center">
                     <input
+                        spellCheck={false}
                         placeholder={"엔터로 저장"}
                         maxLength={10}
                         className="w-full"

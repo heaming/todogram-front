@@ -70,7 +70,7 @@ const CategoryList = ({ categories, onClick }: CategoryProps) => {
                     ${isLeftEnd ? "opacity-30 pointer-events-none" : "cursor-pointer"}
                 `}
             >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4"/>
             </button>
             <div className="relative w-full overflow-hidden">
                 <Tabs
@@ -89,10 +89,10 @@ const CategoryList = ({ categories, onClick }: CategoryProps) => {
                                     <TabsTrigger
                                         key={item.id}
                                         value={item.id}
-                                        className={`shrink-0 whitespace-nowrap text-xs px-4 rounded-md transition
+                                        className={`shrink-0 whitespace-nowrap text-xs px-4 mx-0.5 rounded-md transition
                                             ${isActive
                                             ? `bg-white shadow-sm`
-                                            : "text-gray-500 border-transparent"}
+                                            : `text-gray-500 border-zinc-200 shadow`}
                                         `}
                                         style={{
                                             borderColor: isActive ? item.color : "transparent",
