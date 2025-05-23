@@ -10,6 +10,7 @@ declare global {
             updateTodoStatus: (id: string, status: boolean) => Promise<{ success: boolean }>;
             updateTodoContent: (id: string, content: string) => Promise<void>;
             deleteTodo: (id: string) => Promise<{ success: boolean }>;
+            getDoneDates: (selectedYM: string) => Promise<string[]>;
 
             addCategory: (request) => Promise<Category>;
             updateCategory: (id: string, request) => Promise<void>;
