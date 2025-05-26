@@ -11,6 +11,7 @@ declare global {
             updateTodoContent: (id: string, content: string) => Promise<void>;
             deleteTodo: (id: string) => Promise<{ success: boolean }>;
             getDoneDates: (selectedYM: string) => Promise<string[]>;
+            getTodosCount: (date: string) => Promise<{ total_count: number, done_count: number }>;
 
             addCategory: (request) => Promise<Category>;
             updateCategory: (id: string, request) => Promise<void>;

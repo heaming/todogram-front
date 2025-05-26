@@ -6,7 +6,6 @@ import type {Todo, Category} from "@/models/todo";
 import {generateKeyBetween} from 'fractional-indexing';
 import CategorySetting from "@/components/todo/category/CategorySetting";
 import {loadingType} from "@/app/page";
-import TodoSkeleton from "@/components/skeleton/TodoSkeleton";
 import {toast} from "sonner";
 
 require('dayjs/locale/ko');
@@ -32,7 +31,7 @@ const messages = [
     "미션 컴플리트! 상금은? 내 기분! 🏆",
     "끝냈어요! 이제 침대가 날 기다려요! 🛋️",
     "할일 클리어! 이젠 냉장고 탐험 타임! 🥪",
-    "오늘의 할일: ✔️ 내일은? 음… 생각 안 해요! 🤷‍♂️",
+    "오늘의 할일:✔️ 내일은... 생각 안 해요! 🤷‍♂️",
     "전설이 됐어요! 이제 전설적인 휴식을… 🦸",
     "모든 할일 해냈다! 당신, 진짜 사람 맞나? 🤖",
     "클리어! 축하합니다, 당신은 슈퍼히어로! 🦸‍♀️",
@@ -61,7 +60,9 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [todosColor, setTodosColor] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
-    const toastShownRef = useRef(false);
+    const [totalCount, setTotalCount] = useState(0);
+    const [doneCount, setDoneCount] = useState(0);
+    const toastShownMapRef = useRef<Map<string, boolean>>(new Map());
 
     const fetchCategories = async () => {
         setIsLoading(true);
@@ -95,6 +96,17 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
         } catch (e) {
             console.log('Failed to get todos :',e);
             return [];
+        }
+    }
+
+    const fetchTodosCount = async (date: string) => {
+        try {
+            const {total_count, done_count} = await window.api.getTodosCount(date);
+            setTotalCount(total_count);
+            setDoneCount(done_count);
+        } catch (e) {
+            console.log('Failed to fetch todos count :',e);
+            return 0;
         }
     }
 
@@ -148,6 +160,7 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
     const handleDelete = (id: string) => {
         deleteTodo(id);
         setTodos((prev) => prev.filter(todo => todo.id != id));
+        setTotalCount(totalCount-1);
     }
 
     const handleEdit = (id: string, newContent: string) => {
@@ -159,6 +172,7 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
 
         if (newTodo) {
             setTodos((prev) => [...prev, newTodo]);
+            setTotalCount(totalCount+1);
         }
     }
 
@@ -169,6 +183,7 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
                     if (isChangedTodo) {
                         try {
                             window.api.updateTodoStatus(id, !todo.status)
+                            setDoneCount(doneCount+1);
                         } catch (e) {
                             console.log(e);
                         }
@@ -176,7 +191,6 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
                     }
                     return todo;
                 }
-
             )
         )
     };
@@ -264,8 +278,11 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
     }
 
     const checkAllDone = () => {
-        const allDone = todos.every(todo => todo.status === true);
-        if (allDone && !toastShownRef.current) {
+        const dateKey = dayjs(selectedDate).format('YYYYMMDD');
+        const allDone = todos && todos.length > 0 && todos.every(todo => todo.status) && doneCount >= totalCount;
+        const toastShown = toastShownMapRef.current.get(dateKey) || false;
+
+        if (allDone && !toastShown) {
             toast(getRandomMessage(), {
                 duration: 2000,
                 description: "",
@@ -277,23 +294,23 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
                 className: 'bg-white border-1 border-zinc-300 text-zinc-700',
             });
             onDone(true);
-            toastShownRef.current = true;
+            toastShownMapRef.current.set(dateKey, true);
         } else if (!allDone) {
-            toastShownRef.current = false;
+            toastShownMapRef.current.set(dateKey, false);
             onDone(false);
         }
     };
 
     useEffect(() => {
+        const _date = dayjs(selectedDate).format('YYYYMMDD');
         const fetchTodos = async () => {
-            const _date = dayjs(selectedDate).format('YYYYMMDD');
             const todos = await getTodos(selectedCategory, _date);
             setTodos(todos);
         }
 
         fetchTodos();
+        fetchTodosCount(_date);
     }, [selectedDate, selectedCategory]);
-
 
     useEffect(() => {
         fetchCategories();

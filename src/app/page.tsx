@@ -17,7 +17,7 @@ export default function Home() {
     const [isCalendarLoading, setIsCalendarLoading] = useState(true);
     const [isTodoLoading, setIsTodoLoading] = useState(true);
     const [isLoadingAll, setIsLoadingAll] = useState(true);
-    const [selectedDateIsDone, setSelectedDateIsDone] = useState(null);
+    const [selectedDateIsDone, setSelectedDateIsDone] = useState<null|boolean>(null);
 
     useEffect(() => {
         if (!isCalendarLoading && !isTodoLoading) setIsLoadingAll(false);
