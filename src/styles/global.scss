@@ -122,6 +122,12 @@
   .rdp-month_caption {
     padding: 15px;
   }
+
+  button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
 }
 
 :root {

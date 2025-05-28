@@ -11,7 +11,7 @@ export default function SidebarLayout({ children }: { children: ReactNode }) {
             <div
                 className={cn(
                     "transition-all duration-300 ease-in-out",
-                    open ? "w-45" : "w-6"
+                    open ? "w-35" : "w-6"
                 )}
             >
                 <AppSidebar variant="inset" />

@@ -1,7 +1,6 @@
 "use client"
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
-
 import {
     Collapsible,
     CollapsibleContent,
@@ -22,48 +21,54 @@ export default function NavMain({
                             items,
                         }: {
     items: {
-        title: string
+        userId?: string,
+        userName?: string,
         url: string
-        icon?: LucideIcon
+        icon?: string
         isActive?: boolean
         items?: {
             title: string
             url: string
         }[]
-    }[]
+    }[],
+    userId?: string
 }) {
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <Collapsible
-                        key={item.title}
+                        key={item.userId}
                         asChild
                         defaultOpen={false}
-                        className="group/collapsible"
+                        // className="group/collapsible"
                     >
                         <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
-                                <SidebarMenuButton tooltip={item.title}>
-                                    {item.icon && <item.icon />}
-                                    <span>{item.title}</span>
+                                <SidebarMenuButton
+                                    className="hover:bg-[#00BC7D33] hover:text-black text-zinc-500 cursor-pointer"
+                                    tooltip={item.userName}
+                                >
+                                    {item.icon && (
+                                        <img src={item.icon} className="w-5 h-5 rounded-md" alt={item.userName} />
+                                    )}
+                                    <span className="truncate text-sm">{item.userName}</span>
                                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    {item.items?.map((subItem) => (
-                                        <SidebarMenuSubItem key={subItem.title}>
-                                            <SidebarMenuSubButton asChild>
-                                                <a href={subItem.url}>
-                                                    <span>{subItem.title}</span>
-                                                </a>
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                    ))}
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
+                            {/*<CollapsibleContent>*/}
+                            {/*    <SidebarMenuSub>*/}
+                            {/*        {item.items?.map((subItem) => (*/}
+                            {/*            <SidebarMenuSubItem key={subItem.title}>*/}
+                            {/*                <SidebarMenuSubButton asChild>*/}
+                            {/*                    <a href={subItem.url}>*/}
+                            {/*                        <span>{subItem.title}</span>*/}
+                            {/*                    </a>*/}
+                            {/*                </SidebarMenuSubButton>*/}
+                            {/*            </SidebarMenuSubItem>*/}
+                            {/*        ))}*/}
+                            {/*    </SidebarMenuSub>*/}
+                            {/*</CollapsibleContent>*/}
                         </SidebarMenuItem>
                     </Collapsible>
                 ))}

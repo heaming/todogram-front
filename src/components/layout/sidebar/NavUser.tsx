@@ -5,7 +5,7 @@ import {
     Bell,
     ChevronsUpDown,
     CreditCard,
-    LogOut,
+    LogOut, Mail,
     Sparkles,
 } from "lucide-react"
 
@@ -29,86 +29,108 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
+import {User} from "@/models/user";
+import {Badge} from "@/components/ui/badge";
+import {useState} from "react";
+import {NoticeDialog} from "@/components/layout/sidebar/NoticeDialog";
+import {ContactDialog} from "@/components/layout/sidebar/ContactDialog";
 
-export default function NavUser({
-                            user,
-                        }: {
-    user: {
-        name: string
-        email: string
-        avatar: string
-    }
-}) {
-    const { isMobile } = useSidebar()
+interface NavUserProps {
+    user: User;
+}
+
+export default function NavUser({user} : NavUserProps) {
+    const { isMobile } = useSidebar();
+    const [openNotice, setOpenNotice] = useState(false);
+    const [openContact, setOpenContact] = useState(false);
 
     return (
-        <SidebarMenu>
-            <SidebarMenuItem>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton
-                            size="lg"
-                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                        >
-                            <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarImage src={user.avatar} alt={user.name} />
-                                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                            </Avatar>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-semibold">{user.name}</span>
-                                <span className="truncate text-xs">{user.email}</span>
-                            </div>
-                            <ChevronsUpDown className="ml-auto size-4" />
-                        </SidebarMenuButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                        side={isMobile ? "bottom" : "right"}
-                        align="end"
-                        sideOffset={4}
-                    >
-                        <DropdownMenuLabel className="p-0 font-normal">
-                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+        <>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <SidebarMenuButton
+                                size="lg"
+                                className="focus:ring-0 focus:border-transparent data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer focus:outline-none focus-visible:outline-none"
+                            >
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={user.avatar} alt={user.name} />
-                                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                    <AvatarImage src={user.avatar} alt={user.userName} />
+                                    <AvatarFallback className="rounded-lg">🤔</AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-semibold">{user.name}</span>
-                                    <span className="truncate text-xs">{user.email}</span>
+                                    <span className="truncate font-medium">{user.userName ?? 'WELCOME'}</span>
+                                    <span className="truncate text-gray-500 text-xs">{user.email}</span>
                                 </div>
-                            </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <Sparkles />
-                                Upgrade to Pro
+                                <ChevronsUpDown className="ml-auto size-4" />
+                            </SidebarMenuButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            className="bg-white shadow border-zinc-100 w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                            side={isMobile ? "bottom" : "right"}
+                            align="end"
+                            sideOffset={2}
+                        >
+                            <DropdownMenuLabel className="p-0 font-normal">
+                                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                                    <Avatar className="h-8 w-8 rounded-lg">
+                                        <AvatarImage src={user.avatar} alt={user.userName} />
+                                        <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                    </Avatar>
+                                    <div className="grid flex-1 text-left text-sm leading-tight">
+                                        <span className="truncate font-medium">{user.userName}</span>
+                                        <span className="truncate text-xs mt-1 text-zinc-500">{user.email}</span>
+                                    </div>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator className="bg-zinc-200 mx-2" />
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        setTimeout(() => {
+                                            setOpenNotice(true)
+                                        }, 100)
+                                    }}
+                                    className="text-xs font-medium text-zinc-700 hover:text-[#00BC7DFF] cursor-pointer">
+                                    <Sparkles />
+                                    <p>UPGRADE TO PRO</p>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        setTimeout(() => {
+                                            setOpenContact(true)
+                                        }, 100)
+                                    }}
+                                    className="text-xs font-medium text-zinc-700 hover:text-[#00BC7DFF] cursor-pointer">
+                                    <Mail/>
+                                    <p>News</p>
+                                </DropdownMenuItem>
+                                {/*<DropdownMenuItem>*/}
+                                {/*    <CreditCard />*/}
+                                {/*    Billing*/}
+                                {/*</DropdownMenuItem>*/}
+                                {/*<DropdownMenuItem>*/}
+                                {/*    <Bell />*/}
+                                {/*    Notifications*/}
+                                {/*</DropdownMenuItem>*/}
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator className="bg-zinc-200 mx-2" />
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setTimeout(() => {
+                                        setOpenNotice(true)
+                                    }, 100)
+                                }}
+                                className="text-xs font-medium text-zinc-700 hover:text-[#00BC7DFF] cursor-pointer">
+                                <LogOut/>
+                                <p>Login</p>
                             </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <BadgeCheck />
-                                Account
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <CreditCard />
-                                Billing
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <Bell />
-                                Notifications
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                            <LogOut />
-                            Log out
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </SidebarMenuItem>
-        </SidebarMenu>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </SidebarMenuItem>
+            </SidebarMenu>
+            <NoticeDialog open={openNotice} onOpenChange={setOpenNotice} />
+            <ContactDialog open={openContact} onOpenChange={setOpenContact} />
+        </>
     )
 }
