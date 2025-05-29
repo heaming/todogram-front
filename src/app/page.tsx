@@ -40,7 +40,7 @@ export default function Home() {
     }
 
     return (
-        <div className="flex min-h-[700px] max-h-[500px] items-center justify-center gap-4 p-4 pt-0 mt-8">
+        <div className="flex min-h-[500] max-h-[500px] items-center justify-center gap-4 p-4 pt-0 mt-8">
             <div className="grid auto-rows-min gap-10 md:grid-cols-2">
                 <div className={`rounded-xl bg-white border-zinc-100 border-1 shadow-md ${isLoadingAll ? 'hidden' : ''}`}>
                     <Calendar onLoad={handleLoading} onSelectDate={handleSelectDate} onDone={selectedDateIsDone}/>

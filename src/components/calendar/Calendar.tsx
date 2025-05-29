@@ -12,7 +12,7 @@ interface CalendarProps {
     onDone: boolean | null;
 }
 
-const TodogramDayButton = (props) => {
+const TodogramDayButton = (props: any) => {
     const isAllDone = props.modifiers.allDone; // modifiers에 allDone이 있으면 true
 
     return (

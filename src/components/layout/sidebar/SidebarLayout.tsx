@@ -7,7 +7,7 @@ export default function SidebarLayout({ children }: { children: ReactNode }) {
     const { open } = useSidebar();
 
     return (
-        <div className="flex w-full overflow-hidden">
+        <div className="flex w-full overflow-hidden h-[650px]">
             <div
                 className={cn(
                     "transition-all duration-300 ease-in-out",

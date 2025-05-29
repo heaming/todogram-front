@@ -17,21 +17,21 @@ const data = {
         userId: 'ME',
         email: 'Hi, there👋🏻',
         userName: 'ME',
-        avatar: '/avatars/avatar10.svg',
+        avatar: './avatars/avatar10.svg',
     },
     navMain: [
         {
             userId: "",
             userName: "ME",
             url: "#",
-            icon: '/avatars/avatar10.svg',
+            icon: './avatars/avatar10.svg',
             isActive: true,
         },
         {
             userId: "more",
             userName: "more...",
             url: "#",
-            icon: '/avatars/avatar1.svg',
+            icon: './avatars/avatar1.svg',
             isActive: true,
         },
     ]
@@ -51,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent>
                 <NavMain items={data.navMain} userId={""}/>
             </SidebarContent>
-            <SidebarFooter>
+            <SidebarFooter className="mb-2">
                 <NavUser user={data.user} />
             </SidebarFooter>
             <SidebarRail />
