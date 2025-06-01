@@ -8,19 +8,32 @@ import {cn} from "@/lib/utils";
 import LayoutWithSidebar from "@/components/layout/sidebar/SidebarLayout";
 import SidebarLayout from "@/components/layout/sidebar/SidebarLayout";
 import {Toaster} from "@/components/ui/sonner";
+import Login from "@/components/login/Login";
 
 interface LayoutProps {
     children: ReactNode;
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-    const [isClient, setIsClient] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
     useEffect(() => {
-        setIsClient(true);
+        const token = localStorage.getItem("token");
+        setIsLoggedIn(!!token);
     }, []);
 
-    const dynamicClassName = isClient ? 'min-h-screen flex flex-col' : 'min-h-screen flex flex-col';
+    if (isLoggedIn === null) {
+        return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    }
+
+    if (!isLoggedIn) {
+        return (
+            <Login onLoginSuccess={(token: string) => {
+                localStorage.setItem("token", token);
+                setIsLoggedIn(true);
+            }} />
+        );
+    }
 
     return (
         <SidebarProvider>

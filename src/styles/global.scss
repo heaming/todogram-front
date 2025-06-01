@@ -123,10 +123,14 @@
     padding: 15px;
   }
 
-  button:focus {
+  not button[data-slot="tabs-trigger"]:focus {
     outline: none !important;
     box-shadow: none !important;
     border: none !important;
+  }
+
+  [data-state="open"] > button[data-dialog-close] {
+    display: none !important;
   }
 }
 

@@ -52,7 +52,7 @@ export default function NavUser({user} : NavUserProps) {
                         <DropdownMenuTrigger asChild>
                             <SidebarMenuButton
                                 size="lg"
-                                className="focus:ring-0 focus:border-transparent data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer focus:outline-none focus-visible:outline-none"
+                                className="nav-user focus:ring-0 focus:border-transparent data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer focus:outline-none focus-visible:outline-none"
                             >
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     <AvatarImage src={user.avatar} alt={user.userName} />
