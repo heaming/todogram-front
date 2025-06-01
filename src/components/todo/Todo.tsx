@@ -5,8 +5,8 @@ import dayjs from "dayjs";
 import type {Todo, Category} from "@/models/todo";
 import {generateKeyBetween} from 'fractional-indexing';
 import CategorySetting from "@/components/todo/category/CategorySetting";
-import {loadingType} from "@/app/page";
 import {toast} from "sonner";
+import {loadingType} from "@/components/layout/Home";
 
 require('dayjs/locale/ko');
 dayjs().locale('ko');

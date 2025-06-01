@@ -2,9 +2,9 @@ import {Day, DayButton, DayPicker} from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import {useEffect, useState} from 'react';
 import {ko} from "date-fns/locale";
-import {loadingType} from "@/app/page";
 import dayjs from "dayjs";
 import {clsx} from "clsx";
+import {loadingType} from "@/components/layout/Home";
 
 interface CalendarProps {
     onLoad: (type: loadingType, loading: boolean) => void;

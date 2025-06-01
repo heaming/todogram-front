@@ -18,6 +18,7 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
+import {validateEmail} from "@/utils/util";
 
 type PasswordForm = {
     userId: string;
@@ -71,6 +72,10 @@ export function PasswordForm({ onLoginSuccess, pageType }: PasswordFormProps) {
         const { userId } = getValues();
         if (!userId.trim()) return;
 
+        if (!validateEmail(userId)) {
+            setAuthState("올바른 이메일 형식을 입력해주세요.")
+        }
+
         setAuthState(null);
 
         try {
@@ -89,7 +94,7 @@ export function PasswordForm({ onLoginSuccess, pageType }: PasswordFormProps) {
     const checkAuthNum = () => {
         const { userId, authNum } = getValues();
 
-        if (!userId.trim()) {
+        if (!userId.trim() || !validateEmail(userId)) {
             setAuthState("정확한 이메일을 입력하세요.")
         }
 

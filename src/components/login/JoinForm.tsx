@@ -18,12 +18,14 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
+import {validateEmail} from "@/utils/util";
+import {registerUser, sendVerifyEmail, verifyCode} from "@/api/user/user";
 
 type JoinForm = {
     userId: string;
-    userName: string;
+    username: string;
     password: string;
-    authNum: string;
+    authCode: string;
 }
 
 interface JoinFormProps {
@@ -39,13 +41,13 @@ export function JoinForm({ pageType }: JoinFormProps) {
     const [authState, setAuthState] = useState<string | null>(null);
     const [successDialogOpen, setSuccessDialogOpen] = useState(false);
 
-    const handleJoin = (request: JoinForm) => {
-        if (!request.password.trim() || !request.userName.trim()) {
+    const handleJoin = async (request: JoinForm) => {
+        if (!request.password.trim() || !request.username.trim()) {
             setError("닉네임, 비밀번호를 모두 입력해주세요.")
             return;
         }
 
-        if (!request.userId.trim() || !request.authNum.trim()) {
+        if (!request.userId.trim() || !request.authCode.trim()) {
             setError("회원가입 중 오류가 발생했습니다.")
             return;
         }
@@ -54,35 +56,47 @@ export function JoinForm({ pageType }: JoinFormProps) {
         setError(null);
 
         try {
-            console.log(request);
-            if (request.userId === 'admin' && request.password === '1234' && request.authNum === '1234') {
-                setSuccessDialogOpen(true);
-            } else {
-                setError("회원 정보를 확인하세요.")
+            const data = {
+                userId: request.userId,
+                password: request.password,
+                username: request.username,
+                authCode: request.authCode,
             }
-        } catch (err) {
-            setError("회원가입 중 오류가 발생했습니다.")
+            const res = await registerUser(data);
+            if (res) {
+                setSuccessDialogOpen(true);
+            }
+        } catch (err: any) {
+            setError(err.message);
         } finally {
             setLoading(false);
         }
     }
 
-    const sendAuthNum = () => {
+    const sendauthCode = async () => {
         // 인증번호 전송
+        setAuthState(null);
         const { userId } = getValues();
         if (!userId.trim()) return;
 
-        setStep('1');
+        try {
+            await sendVerifyEmail(userId);
+        } catch (err: any) {
+            setAuthState(err.message);
+        } finally {
+            setStep('1');
+        }
     }
 
-    const checkAuthNum = () => {
-        const { userId, authNum } = getValues();
+    const checkauthCode = async () => {
+        setAuthState(null);
+        const { userId, authCode } = getValues();
 
-        if (!userId.trim()) {
+        if (!userId.trim() || !validateEmail(userId)) {
             setAuthState("정확한 이메일을 입력하세요.")
         }
 
-        if (!authNum.trim()) {
+        if (!authCode.trim()) {
             setAuthState("인증번호를 정확하게 입력하세요.")
         }
 
@@ -91,13 +105,12 @@ export function JoinForm({ pageType }: JoinFormProps) {
 
         // 인증번호 확인
         try {
-            if (userId === 'admin' && authNum === '1234') {
+            const result = await verifyCode(userId, authCode);
+            if (result) {
                 setStep('2');
-            } else {
-                setAuthState("인증번호를 정확하게 입력하세요.")
             }
-        } catch (err) {
-            setAuthState('회원가입 중 오류가 발생했습니다.');
+        } catch (err: any) {
+            setAuthState(err.message);
         } finally {
             setAuthenticating(false);
         }
@@ -129,7 +142,7 @@ export function JoinForm({ pageType }: JoinFormProps) {
                                             <a
                                                 onClick={(e) => {
                                                     e.preventDefault();
-                                                    sendAuthNum();
+                                                    sendauthCode();
                                                 }}
                                                 href="#"
                                                 className={`ml-auto text-xs underline-none text-zinc-500 hover:text-[#00BC7D]`}
@@ -154,7 +167,7 @@ export function JoinForm({ pageType }: JoinFormProps) {
                                                 <a
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        sendAuthNum();
+                                                        sendauthCode();
                                                     }}
                                                     href="#"
                                                     className={`ml-auto text-xs underline-none text-zinc-500 hover:text-[#00BC7D]`}
@@ -171,8 +184,8 @@ export function JoinForm({ pageType }: JoinFormProps) {
                                             />
                                         </div>
                                         <input
-                                            id="authNum"
-                                            {...register("authNum", {required: "인증번호는 필수입니다"})}
+                                            id="authCode"
+                                            {...register("authCode", {required: "인증번호는 필수입니다"})}
                                             placeholder={"인증번호를 입력하세요"}
                                             className="rounded-md border-1 border-zinc-200 py-1 px-2 text-sm"
                                         />
@@ -184,7 +197,7 @@ export function JoinForm({ pageType }: JoinFormProps) {
                                         <Button
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                checkAuthNum();
+                                                checkauthCode();
                                             }}
                                             disabled={authenticating}
                                             className="cursor-pointer w-full bg-zinc-100 hover:text-white hover:bg-[#00BC7DFF]"
@@ -217,8 +230,8 @@ export function JoinForm({ pageType }: JoinFormProps) {
                                         <div className={`grid gap-3`}>
                                             <Label htmlFor="userName">닉네임</Label>
                                             <input
-                                                id="userName"
-                                                {...register("userName", {required: "닉네임은 필수입니다"})}
+                                                id="username"
+                                                {...register("username", {required: "닉네임은 필수입니다"})}
                                                 placeholder="닉네임을 입력하세요"
                                                 className="rounded-md border-1 border-zinc-200 py-1 px-2 text-sm"
                                             />

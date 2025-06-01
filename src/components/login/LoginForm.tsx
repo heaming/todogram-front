@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import {useState} from "react";
 import {trim} from "lodash";
 import {LoginPageType} from "@/components/login/Login";
+import {login} from "@/api/user/user";
 
 type LoginForm = {
     userId: string;
@@ -26,7 +27,7 @@ export function LoginForm({ onLoginSuccess, pageType }: LoginFormProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = (request: LoginForm) => {
+    const handleLogin = async (request: LoginForm) => {
         if (!request.userId.trim() || !request.password.trim()) {
             setError("아이디와 비밀번호를 모두 입력해주세요")
             return;
@@ -36,15 +37,11 @@ export function LoginForm({ onLoginSuccess, pageType }: LoginFormProps) {
         setError(null);
 
         try {
-            console.log(request);
-            if (request.userId === 'admin' && request.password === '1234') {
-                const fakeToken = 'fake-jwt-token';
-                onLoginSuccess(fakeToken);
-            } else {
-                setError('아이디 또는 비밀번호가 잘못되었습니다.');
-            }
-        } catch (err) {
-            setError('로그인 중 오류가 발생했습니다.');
+            const result = await login(request.userId, request.password);
+            const token = result.accessToken;
+            onLoginSuccess(token);
+        } catch (err: any) {
+            setError(err.message);
         } finally {
             setLoading(false);
         }

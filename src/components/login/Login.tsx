@@ -12,32 +12,7 @@ interface LoginProps {
 export type LoginPageType = 'LOGIN' | 'JOIN' | 'PASSWORD';
 
 export default function Login({ onLoginSuccess }: LoginProps) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
     const [pageType, setPageType] = useState<LoginPageType>('LOGIN');
-
-    const handleLogin = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            // 실제 API 호출은 여기서!
-            // 예시: fetch('/api/login', { method: 'POST', body: JSON.stringify({username, password}) })
-            // 지금은 임시로 로그인 성공 가정, token은 예시값
-            if (username === 'admin' && password === '1234') {
-                const fakeToken = 'fake-jwt-token';
-                onLoginSuccess(fakeToken);
-            } else {
-                setError('아이디 또는 비밀번호가 잘못되었습니다.');
-            }
-        } catch (err) {
-            setError('로그인 중 오류가 발생했습니다.');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handlePageType = (type: LoginPageType) => {
         if (type === 'JOIN') {
