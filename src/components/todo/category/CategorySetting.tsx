@@ -1,6 +1,5 @@
 import {Circle, Menu, Plus, SettingsIcon, Square} from "lucide-react";
 import {useEffect, useRef, useState} from "react";
-import type {Category} from "@/models/todo";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {
     closestCenter,
@@ -23,8 +22,11 @@ import {generateKeyBetween} from "fractional-indexing";
 import CategorySortItem from "@/components/todo/category/CategorySortItem";
 import {debounce} from "lodash";
 import {toast} from "sonner";
+import {deleteCategory, updateCategory} from "@/api/category/category";
+import {Category, UpdateCategoryType} from "@/models/category";
 
 interface CategorySettingProps {
+    id: string;
     categories: Category[];
     onChangeCategorySort: (id: string, order: string) => void;
     onAddCategory: (content: string) => void;
@@ -32,7 +34,7 @@ interface CategorySettingProps {
     onOpen: () => void;
 }
 
-const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryContent, onAddCategory, onOpen}: CategorySettingProps) => {
+const CategorySetting = ({id, categories, onChangeCategorySort, onChangeCategoryContent, onAddCategory, onOpen}: CategorySettingProps) => {
     const [items, setItems] = useState<Category[]>([]);
 
     const sensors = useSensors(
@@ -87,8 +89,8 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
         setItems([...items, newCategroy]);
     }
 
-    const handleDelete = async (id: string) => {
-        if (!id || id === '') return;
+    const handleDelete = async (categoryId: string) => {
+        if (!categoryId || categoryId === '') return;
         if (items.length <= 1) {
             toast("최소 1개 이상의 카테고리가 필요합니다.", {
                 description: "",
@@ -102,33 +104,36 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
             return;
         }
 
-        setItems((prev) => prev.filter(category => category.id !== id));
+        setItems((prev) => prev.filter(category => category.id !== categoryId));
 
         try {
-            await window.api.deleteCategory(id);
+            await deleteCategory(categoryId);
         } catch (error) {
             console.log("Failed to remove category", error);
         }
     }
 
-    const handleCategoryColor = async (id: string, color: string) => {
-        if (id === '' || color === '') return;
-
-        setItems((prev) =>
-            prev.map(category => {
-                    const isChangedCategory = category.id === id;
-                    if (isChangedCategory) {
-                        try {
-                            window.api.updateCategory(id, {...category, color: color })
-                        } catch (e) {
-                            console.log(e);
-                        }
-                        return {...category, color: color };
-                    }
-                    return category;
-                }
+    const handleCategoryColor = async (categoryId: string, color: string) => {
+        if (categoryId === '' || color === '') return;
+        setItems(prev =>
+            prev.map(category =>
+                category.id === categoryId
+                    ? {...category, color: color }
+                    : category
             )
-        )
+        );
+
+        await (async () => {
+            try {
+                await updateCategory(categoryId, {
+                    userId: id,
+                    updateType: UpdateCategoryType.color,
+                    value: color,
+                });
+            } catch (e) {
+                console.log('시간 업데이트 실패:', e);
+            }
+        })();
     }
 
     const handleCategoryContent = async (id: string | undefined | '', content: string) => {
@@ -187,13 +192,12 @@ const CategorySetting = ({categories, onChangeCategorySort, onChangeCategoryCont
                 }}
                 >
                 <PopoverTrigger asChild>
-                    <button className="mr-4 text-zinc-400 rounded-sm cursor-pointer flex justify-center items-center mb-2">
+                    <button className={"mr-4 text-zinc-400 rounded-sm cursor-pointer flex justify-center items-center mb-2"}>
                     <SettingsIcon className="mt-1"
                                   size={17}/>
-                        {/*<span className="text-xs font-light pl-1">카테고리 설정</span>*/}
                     </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-56 bg-white border-zinc-100">
+                <PopoverContent alignOffset={-170} align="start" className="w-56 bg-white border-zinc-200 shadow-2xl">
                     <div className="grid gap-4 mb-2">
                         <div className="flex justify-between text-zinc-500 align-middle">
                             <div className="text-sm">카테고리 설정</div>

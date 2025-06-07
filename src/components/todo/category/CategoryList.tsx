@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect } from "react";
-import type { Category } from "@/models/todo";
+import { Category } from "@/models/category";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -89,14 +89,26 @@ const CategoryList = ({ categories, onClick }: CategoryProps) => {
                                     <TabsTrigger
                                         key={item.id}
                                         value={item.id}
-                                        className={`shrink-0 whitespace-nowrap text-xs px-4 mx-0.5 rounded-md transition
+                                        className={`
+                                            cursor-pointer
+                                            shrink-0
+                                            whitespace-nowrap
+                                            text-xs
+                                            px-4
+                                            mx-0.5
+                                            rounded-md
+                                            transition
+                                            shadow-sm
                                             ${isActive
-                                            ? `bg-white shadow-sm`
-                                            : `text-gray-500 border-zinc-200 shadow`}
+                                            ? "bg-white"
+                                            : "text-gray-500 border border-zinc-200 bg-white"}
+                                            focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1
+                                            focus-visible:ring-[${item.color}]
                                         `}
                                         style={{
                                             borderColor: isActive ? item.color : "transparent",
                                             color: isActive ? item.color : '',
+                                            boxShadow: isActive ? `0 0 5px ${item.color}77` : undefined,
                                         }}
                                     >
                                         {item.content}

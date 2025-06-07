@@ -14,7 +14,7 @@ export default function SidebarLayout({ children }: { children: ReactNode }) {
                     open ? "w-35" : "w-6"
                 )}
             >
-                <AppSidebar variant="inset" />
+                <AppSidebar variant="inset"/>
             </div>
 
             <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out ml-5">

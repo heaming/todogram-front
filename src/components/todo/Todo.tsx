@@ -2,59 +2,28 @@ import React, {useEffect, useRef, useState} from 'react';
 import CategoryList from "@/components/todo/category/CategoryList";
 import TodoList from "@/components/todo/todo/TodoList";
 import dayjs from "dayjs";
-import type {Todo, Category} from "@/models/todo";
+import type {Todo} from "@/models/todo";
+import {UpdateTodoType} from "@/models/todo";
+import {Category, UpdateCategoryType} from "@/models/category";
 import {generateKeyBetween} from 'fractional-indexing';
 import CategorySetting from "@/components/todo/category/CategorySetting";
-import {loadingType} from "@/app/page";
 import {toast} from "sonner";
+import {loadingType} from "@/app/user/[id]/todos/page";
+import {addCategory, getCategories, updateCategory} from "@/api/category/category";
+import {getRandomDoneMessage} from "@/utils/util";
+import {addTodo, deleteTodo, getTodos, getTodosCount, updateTodo} from "@/api/todo/todo";
 
 require('dayjs/locale/ko');
 dayjs().locale('ko');
 
 interface TodoProps {
+    id: string;
     onLoad: (type: loadingType, loading: boolean) => void;
     selectedDate: Date | undefined;
     onDone: (allDone: boolean) => void
 }
 
-const initialCategory: Category = {
-    color: "#00BC7DFF",
-    content: "내 카테고리",
-    createdAt: "",
-    deletedAt: "",
-    id: "",
-    sort: generateKeyBetween(null, null),
-    userId: ""
-}
-const messages = [
-    "할일 끝! 내 능력치가 +10 올랐어요! 🆙",
-    "미션 컴플리트! 상금은? 내 기분! 🏆",
-    "끝냈어요! 이제 침대가 날 기다려요! 🛋️",
-    "할일 클리어! 이젠 냉장고 탐험 타임! 🥪",
-    "오늘의 할일:✔️ 내일은... 생각 안 해요! 🤷‍♂️",
-    "전설이 됐어요! 이제 전설적인 휴식을… 🦸",
-    "모든 할일 해냈다! 당신, 진짜 사람 맞나? 🤖",
-    "클리어! 축하합니다, 당신은 슈퍼히어로! 🦸‍♀️",
-    "할일 다 끝냈으니, 뇌도 휴식! 🧠💤",
-    "오늘은 끝! 내일은… 내일 생각해! 💤",
-    "할일 다 끝났어요! 뿌듯해요! 😊",
-    "오늘도 해냈다! 이제 커피 한잔? ☕️",
-    "다 했으니 게임 한 판 할 시간! 🎮",
-    "완료! 이 기세로 내일도 화이팅! 💪",
-    "할일 끝! 오늘도 내가 최고! 👑",
-    "와우! 다 끝났어요! 축하 파티 준비! 🎉",
-    "끝냈다! 이제 휴식 모드 ON! 🛌",
-    "다 했다니! 내일도 같이 달려요! 🚀",
-    "할일 완료! 이제 영화 볼 시간! 🍿",
-    "모든 게 끝났다! 당신은 슈퍼히어로?! 🦸‍♂️"
-];
-
-const getRandomMessage = () => {
-    const idx = Math.floor(Math.random() * messages.length);
-    return messages[idx];
-}
-
-const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
+const Todo = ({ id, selectedDate, onLoad, onDone }: TodoProps) => {
     const [isLoading, setIsLoading] = useState(true);
     const [todos, setTodos] = useState<Todo[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -64,69 +33,54 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
     const [doneCount, setDoneCount] = useState(0);
     const toastShownMapRef = useRef<Map<string, boolean>>(new Map());
 
-    const fetchCategories = async () => {
+    const fetchCategories = async (userId: string) => {
+        if(!userId) return;
         setIsLoading(true);
-        if (typeof window !== 'undefined' && window.api) {
-            try {
-                const categories: Category[] = await window.api.getCategories('');
-                if (!categories || categories.length <= 0) {
-                    const initial = await window.api.addCategory(initialCategory);
-                    categories.push(initial);
-                }
-
-                setCategories(categories);
-                setTodosColor(categories.length > 0 ? categories[0].color : '#166534');
-                if (categories && categories.length > 0) {
-                    setSelectedCategory(categories[0].id);
-                }
-            } catch (e) {
-                console.log('Failed to get Categories', e);
-            } finally {
-                setIsLoading(false);
-            }
-        } else {
-            console.error('window.api is not available');
+        try {
+            const response: Category[] = await getCategories(userId);
+            setCategories(response);
+        } catch (e) {
+            console.log('Failed to get Categories', e);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const getTodos = async (categoryId: string, date: string) => {
-        try {
-            const todos = await window.api.getTodos(categoryId, date);
-            return todos;
-        } catch (e) {
-            console.log('Failed to get todos :',e);
-            return [];
-        }
-    }
-
     const fetchTodosCount = async (date: string) => {
         try {
-            const {total_count, done_count} = await window.api.getTodosCount(date);
+            const {total_count, done_count} = await getTodosCount(id, date);
             setTotalCount(total_count);
             setDoneCount(done_count);
         } catch (e) {
             console.log('Failed to fetch todos count :',e);
-            return 0;
+            setTotalCount(0);
+            setDoneCount(0);
         }
     }
 
-    const deleteTodo = async (id: string) => {
+    const editTodoContent = async (todoId: string, newContent: string) => {
         try {
-            await window.api.deleteTodo(id);
-        } catch (e) {
-            console.log('Failed to delete todo :',e);
-        }
-    }
-
-    const editTodoContent = async (id: string, newContent: string) => {
-        try {
-            await window.api.updateTodoContent(id, newContent);
+            await updateTodo(todoId, {
+                userId: id,
+                updateType: UpdateTodoType.content,
+                value: newContent
+            });
         } catch (e) {
             console.log('Failed to edit todo :',e);
         }
     }
 
-    const addTodo = async (content: string) => {
+    const handleDelete = async (id: string) => {
+        await deleteTodo(id);
+        setTodos((prev) => prev.filter(todo => todo.id != id));
+        setTotalCount(totalCount-1);
+    }
+
+    const handleEdit = async (id: string, newContent: string) => {
+        await editTodoContent(id, newContent);
+    }
+
+    const handleAdd = async (content: string) => {
         const generateSort = () => {
             if (todos && todos.length > 0) {
                 return generateKeyBetween(todos[todos.length-1].sort, null);
@@ -134,11 +88,11 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
                 return generateKeyBetween(null, null);
             }
         }
-        const sort = generateSort();
 
+        const sort = generateSort();
         const request = {
             id: '',
-            userId: '',
+            userId: id,
             categoryId: selectedCategory,
             sort: sort,
             content: content,
@@ -149,96 +103,95 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
         }
 
         try {
-            const newTodo = await window.api.addTodo(request);
-            return newTodo;
+            const newTodo = await addTodo(request);
+
+            if (newTodo) {
+                setTodos((prev) => [...prev, newTodo]);
+                setTotalCount(totalCount+1);
+            }
         } catch (e) {
             console.log('Failed to add todo :',e);
         }
-        return null;
     }
 
-    const handleDelete = (id: string) => {
-        deleteTodo(id);
-        setTodos((prev) => prev.filter(todo => todo.id != id));
-        setTotalCount(totalCount-1);
-    }
+    const handleState = async (todoId: string) => {
+        await (async () => {
+            try {
+                await updateTodo(todoId, {
+                    userId: id,
+                    updateType: UpdateTodoType.status,
+                    value: !todos.find(todo => todo.id === todoId)?.status,
+                });
 
-    const handleEdit = (id: string, newContent: string) => {
-        editTodoContent(id, newContent);
-    }
+                setDoneCount(doneCount + 1);
+            } catch (e) {
+                console.log('Failed to edit todo :', e);
+            }
+        })();
 
-    const handleAdd = async (content: string) => {
-        const newTodo = await addTodo(content);
-
-        if (newTodo) {
-            setTodos((prev) => [...prev, newTodo]);
-            setTotalCount(totalCount+1);
-        }
-    }
-
-    const handleState = (id: string) => {
-        setTodos((prev) =>
-            prev.map(todo => {
-                    const isChangedTodo = todo.id === id;
-                    if (isChangedTodo) {
-                        try {
-                            window.api.updateTodoStatus(id, !todo.status)
-                            setDoneCount(doneCount+1);
-                        } catch (e) {
-                            console.log(e);
-                        }
-                        return {...todo, status: !todo.status};
-                    }
-                    return todo;
-                }
-            )
-        )
+        const updated = todos.map(todo => {
+            if (todo.id === todoId) {
+                return { ...todo, status: !todo.status };
+            }
+            return todo;
+        });
+        setTodos(updated);
     };
 
-    const handleTime = (id: string, timeAt: string, timeAmpm: string) => {
-        setTodos((prev) =>
-            prev.map(todo => {
-                    const isChangedTodo = todo.id === id;
-                    if (isChangedTodo) {
-                        try {
-                            window.api.updateTodo(id,{...todo, timeAt: timeAt, timeAmpm: timeAmpm })
-                        } catch (e) {
-                            console.log(e);
-                        }
-                        return {...todo, timeAt: timeAt, timeAmpm: timeAmpm };
-                    }
-                    return todo;
-                }
-            )
-        )
-    }
 
-    const handleSelectedCategory = (id: string) => {
-        setSelectedCategory(id);
-        setTodosColor(categories.filter(x => x.id === id)[0].color);
-    }
-
-    const handleCategorySort = async (id: string, sort: string) => {
-        try {
-            const category = categories.filter(item => item.id === id)[0];
-            if(category) {
-                await window.api.updateCategory(id, {...category, sort: sort })
+    const handleTime = async (todoId: string, timeAt: string, timeAmpm: string) => {
+        await (async () => {
+            try {
+                await updateTodo(todoId, {
+                    userId: id,
+                    updateType: UpdateTodoType.timeAt,
+                    value: !todos.find(todo => todo.id === todoId)?.timeAt,
+                });
+            } catch (e) {
+                console.log('시간 업데이트 실패:', e);
             }
-        }  catch (e) {
-            console.log(e);
+        })();
+
+        setTodos(prev =>
+            prev.map(todo =>
+                todo.id === todoId
+                    ? { ...todo, timeAt, timeAmpm }
+                    : todo
+            )
+        );
+    };
+
+    const handleSelectedCategory = (categoryId: string) => {
+        setSelectedCategory(categoryId);
+        setTodosColor(categories.filter(x => x.id === categoryId)[0].color);
+    }
+
+    const handleCategorySort = async (categoryId: string, sort: string) => {
+        try {
+            await updateCategory(categoryId, {
+                userId: id,
+                updateType: UpdateCategoryType.sort,
+                value: sort,
+            });
+        } catch (e) {
+            console.log('카테고리 업데이트 실패 :', e);
         }
     }
 
-    const handleCategoryContent = async (id: string, content: string) => {
+    const handleCategoryContent = async (categoryId: string, content: string) => {
         try {
-            await window.api.updateCategoryContent(id, content);
+            await updateCategory(categoryId, {
+                userId: id,
+                updateType: UpdateCategoryType.content,
+                value: content,
+            });
         } catch (e) {
-            console.log(e);
+            console.log('카테고리 업데이트 실패 :', e);
         }
 
         setCategories((prev) =>
             prev.map(category => {
-                if (category.id === id) {
+                if (category.id === categoryId) {
                     return { ...category, content };
                 }
                 return category;
@@ -263,10 +216,11 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
             deletedAt: "",
             id: "",
             sort: sort,
-            userId: ""
+            userId: id,
         }
         try {
-            const newCategory = await window.api.addCategory(request);
+            const newCategory = await addCategory(request);
+            if (!newCategory) return;
             setCategories(prev => [...prev, newCategory]);
         } catch (e) {
             console.log('Failed to update category content');
@@ -274,7 +228,13 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
     }
 
     const handleCategorySettingPopover = async () => {
-        await fetchCategories();
+        if (!id) return;
+        const categories = await getCategories(id);
+        setCategories(categories);
+        setTodosColor(categories.length > 0 ? categories[0].color : '#00BC7DFF');
+        if (categories && categories.length > 0) {
+            setSelectedCategory(categories[0].id);
+        }
     }
 
     const checkAllDone = () => {
@@ -283,7 +243,7 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
         const toastShown = toastShownMapRef.current.get(dateKey) || false;
 
         if (allDone && !toastShown) {
-            toast(getRandomMessage(), {
+            toast(getRandomDoneMessage(), {
                 duration: 2000,
                 description: "",
                 action: {
@@ -302,18 +262,25 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
     };
 
     useEffect(() => {
+        if (!selectedCategory || !selectedDate) return;
         const _date = dayjs(selectedDate).format('YYYYMMDD');
         const fetchTodos = async () => {
-            const todos = await getTodos(selectedCategory, _date);
+            const todos = await getTodos(id, selectedCategory, _date);
             setTodos(todos);
         }
-
         fetchTodos();
         fetchTodosCount(_date);
     }, [selectedDate, selectedCategory]);
 
     useEffect(() => {
-        fetchCategories();
+        if (categories.length > 0 && !selectedCategory) {
+            setSelectedCategory(categories[0].id);
+            setTodosColor(categories[0].color);
+        }
+    }, [categories]);
+
+    useEffect(() => {
+        fetchCategories(id);
     }, []);
 
     useEffect(() => {
@@ -334,6 +301,7 @@ const Todo = ({ selectedDate, onLoad, onDone }: TodoProps) => {
                 />
             </div>
             <CategorySetting
+                id={id}
                 categories={categories}
                 onChangeCategorySort={handleCategorySort}
                 onChangeCategoryContent={handleCategoryContent}

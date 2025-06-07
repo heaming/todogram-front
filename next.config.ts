@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    output: 'export',
-    trailingSlash: true, // 모든 경로에 '/' 붙이도록 (파일로 인식)
-    images: {
-        unoptimized: true, // 'next/image' 사용 시 필수
+    async rewrites() {
+        return [
+            {
+                source: "/api/v1/:path*",       // 프론트 요청 경로
+                destination: "http://localhost:4000/api/v1/:path*", // 백엔드 주소
+            },
+        ];
     },
-    assetPrefix: '.'
 };
 
 export default nextConfig;
