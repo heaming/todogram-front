@@ -1,3 +1,5 @@
+import {User} from "@/models/user";
+
 export const sendVerifyEmail = async (userId: string) => {
     const response = await fetch('/api/v1/email/verification', {
         method: 'POST',
@@ -74,7 +76,8 @@ export const registerUser = async ( request : {userId: string, password: string,
             throw new Error(errorMessage);
         }
 
-        return await response.json();
+        const newUser:User =await response.json();
+        return newUser;
     } catch (error) {
         console.error(error);
         throw error;
@@ -103,10 +106,17 @@ export const login = async (userId: string, password: string) => {
         }
 
         const data = await response.json();
-        localStorage.setItem('accessToken', data.accessToken);
         return data;
     } catch (error) {
         console.error(error);
         throw error;
+    }
+}
+
+export const logout = async () => {
+    try {
+        localStorage.removeItem('accessToken');
+    } catch (e) {
+        console.error("로그아웃 실패", e);
     }
 }

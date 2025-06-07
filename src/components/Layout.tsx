@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
     }, []);
 
@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     if (!isLoggedIn) {
         return (
             <Login onLoginSuccess={(token: string) => {
-                localStorage.setItem("token", token);
+                localStorage.setItem("accessToken", token);
                 setIsLoggedIn(true);
             }} />
         );

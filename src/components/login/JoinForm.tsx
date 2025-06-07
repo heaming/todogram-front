@@ -20,6 +20,21 @@ import {
 } from "@/components/ui/dialog";
 import {validateEmail} from "@/utils/util";
 import {registerUser, sendVerifyEmail, verifyCode} from "@/api/user/user";
+import {generateKeyBetween} from "fractional-indexing";
+import {Category} from "@/models/category";
+import {addCategory, addInitialCategory} from "@/api/category/category";
+
+const createInitialCategory = (userId: string): Category => {
+    return {
+        color: "#00BC7DFF",
+        content: "내 카테고리",
+        createdAt: "",
+        deletedAt: "",
+        id: "",
+        sort: generateKeyBetween(null, null),
+        userId: userId
+    }
+}
 
 type JoinForm = {
     userId: string;
@@ -64,7 +79,13 @@ export function JoinForm({ pageType }: JoinFormProps) {
             }
             const res = await registerUser(data);
             if (res) {
-                setSuccessDialogOpen(true);
+                try {
+                    const initialCategory = createInitialCategory(res.id);
+                    const category = await addInitialCategory(initialCategory);
+                    setSuccessDialogOpen(true);
+                } catch (e) {
+                    console.error('❌ addCategory 실패:', e);
+                }
             }
         } catch (err: any) {
             setError(err.message);
@@ -231,6 +252,7 @@ export function JoinForm({ pageType }: JoinFormProps) {
                                             <Label htmlFor="userName">닉네임</Label>
                                             <input
                                                 id="username"
+                                                maxLength={6}
                                                 {...register("username", {required: "닉네임은 필수입니다"})}
                                                 placeholder="닉네임을 입력하세요"
                                                 className="rounded-md border-1 border-zinc-200 py-1 px-2 text-sm"

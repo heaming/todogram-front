@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect } from "react";
-import type { Category } from "@/models/todo";
+import { Category } from "@/models/category";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -85,7 +85,6 @@ const CategoryList = ({ categories, onClick }: CategoryProps) => {
                             {categories && categories.map((item) => {
                                 if (!item || typeof item.id === "undefined") return null;
                                 const isActive = value === item.id;
-                                console.log(item.id, isActive)
                                 return (
                                     <TabsTrigger
                                         key={item.id}

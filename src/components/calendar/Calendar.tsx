@@ -4,16 +4,18 @@ import {useEffect, useState} from 'react';
 import {ko} from "date-fns/locale";
 import dayjs from "dayjs";
 import {clsx} from "clsx";
-import {loadingType} from "@/components/layout/Home";
+import {loadingType} from "@/app/user/[id]/todos/page";
+import {getDoneDates} from "@/api/todo/todo";
 
 interface CalendarProps {
+    id: string;
     onLoad: (type: loadingType, loading: boolean) => void;
     onSelectDate: (date: Date) => void;
     onDone: boolean | null;
 }
 
 const TodogramDayButton = (props: any) => {
-    const isAllDone = props.modifiers.allDone; // modifiers에 allDone이 있으면 true
+    const isAllDone = props.modifiers.allDone;
 
     return (
         <button
@@ -26,7 +28,7 @@ const TodogramDayButton = (props: any) => {
     );
 };
 
-export const Calendar = ({ onSelectDate, onLoad, onDone }: CalendarProps ) =>  {
+export const Calendar = ({ id, onSelectDate, onLoad, onDone }: CalendarProps ) =>  {
     const [selected, setSelected] = useState<Date>(new Date());
     const [isLoading, setIsLoading] = useState(true);
     const [allDoneDates, setAllDoneDates] = useState<Date[]>([]);
@@ -62,11 +64,10 @@ export const Calendar = ({ onSelectDate, onLoad, onDone }: CalendarProps ) =>  {
         allDone: 'all-done',
     };
 
-    const fetchData = async (selectedYM: string) => {
+    const fetchData = async (id: string, selectedYM: string) => {
         setIsLoading(true);
         try {
-            const dates = await window.api.getDoneDates(selectedYM);
-            console.log(dates);
+            const dates = await getDoneDates(id, selectedYM);
             if (!dates || dates.length <= 0) return;
 
             const convertedDates = convertToDate(dates);
@@ -85,9 +86,10 @@ export const Calendar = ({ onSelectDate, onLoad, onDone }: CalendarProps ) =>  {
     }, [selected]);
 
     useEffect(() => {
-        const date = dayjs(new Date()).format('YYYYMM');
-        fetchData(date);
-    }, []);
+        if (!id) return;
+        const selectedYM = dayjs(new Date()).format('YYYYMM');
+        fetchData(id, selectedYM);
+    }, [id]);
 
     useEffect(() => {
         onLoad('calendar', isLoading);
@@ -120,7 +122,7 @@ export const Calendar = ({ onSelectDate, onLoad, onDone }: CalendarProps ) =>  {
                 }}
                 onMonthChange={(month) => {
                     const selectedYM = dayjs(month).format('YYYYMM');
-                    fetchData(selectedYM);
+                    fetchData(id, selectedYM);
                 }}
             />
         </div>

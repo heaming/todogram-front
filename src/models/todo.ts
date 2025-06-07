@@ -10,12 +10,17 @@ export interface Todo {
     categoryId: string;
 }
 
-export interface Category {
-    id: string;
+export enum UpdateTodoType {
+    sort,
+    content,
+    status,
+    date,
+    timeAt,
+    timeAmpm
+}
+
+export interface TodoUpdateRequest {
     userId: string;
-    sort: string;
-    content: string;
-    createdAt: string;
-    deletedAt: string;
-    color: string,
+    updateType: UpdateTodoType;
+    value: any;
 }

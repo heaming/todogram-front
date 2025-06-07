@@ -6,11 +6,14 @@ import Todo from "@/components/todo/Todo";
 import dayjs from "dayjs";
 import TodoSkeleton from "@/components/skeleton/TodoSkeleton";
 import CalendarSkeleton from "@/components/skeleton/CalendarSkeleton";
-import {useRouter} from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
+import {NoUserId} from "@/components/skeleton/NoUserId";
 
 export type loadingType = 'calendar' | 'todo';
 
-export default function Home() {
+export default function UserTodosPage() {
+    const { id: userId } = useParams();
+    const id = Array.isArray(userId) ? userId[0] : userId;
     const [selectedDate, setSelectedDate] = useState<Date>();
     const [isCalendarLoading, setIsCalendarLoading] = useState(true);
     const [isTodoLoading, setIsTodoLoading] = useState(true);
@@ -18,7 +21,7 @@ export default function Home() {
     const [selectedDateIsDone, setSelectedDateIsDone] = useState<null|boolean>(null);
 
     useEffect(() => {
-        if (!isCalendarLoading && !isTodoLoading) setIsLoadingAll(false);
+        setIsLoadingAll(isCalendarLoading || isTodoLoading);
     }, [isCalendarLoading, isTodoLoading]);
 
     const handleLoading = (type: loadingType, loading: boolean) => {
@@ -37,11 +40,13 @@ export default function Home() {
         setSelectedDateIsDone(allDone);
     }
 
+    if (!id) return <NoUserId />;
+
     return (
         <div className="flex min-h-[500] max-h-[500px] items-center justify-center gap-4 p-4 pt-0 mt-8">
             <div className="grid auto-rows-min gap-10 md:grid-cols-2">
                 <div className={`rounded-xl bg-white border-zinc-100 border-1 shadow-md ${isLoadingAll ? 'hidden' : ''}`}>
-                    <Calendar onLoad={handleLoading} onSelectDate={handleSelectDate} onDone={selectedDateIsDone}/>
+                    <Calendar id={id} onLoad={handleLoading} onSelectDate={handleSelectDate} onDone={selectedDateIsDone}/>
                 </div>
                 {isLoadingAll &&
                     (<>
@@ -54,7 +59,7 @@ export default function Home() {
                     </>)
                 }
                 <div className={`rounded-xl bg-white p-3 border-zinc-100 border-1 shadow-md ${isLoadingAll ? 'hidden' : ''}`}>
-                    <Todo selectedDate={selectedDate} onLoad={handleLoading} onDone={handleAllDone}/>
+                    <Todo id={id}  selectedDate={selectedDate} onLoad={handleLoading} onDone={handleAllDone}/>
                 </div>
             </div>
         </div>
