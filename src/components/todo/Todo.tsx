@@ -114,16 +114,8 @@ const Todo = ({ id, selectedDate, onLoad, onDone }: TodoProps) => {
         }
     }
 
-    const handleState = (todoId: string) => {
-        const updated = todos.map(todo => {
-            if (todo.id === todoId) {
-                return { ...todo, status: !todo.status };
-            }
-            return todo;
-        });
-        setTodos(updated);
-
-        (async () => {
+    const handleState = async (todoId: string) => {
+        await (async () => {
             try {
                 await updateTodo(todoId, {
                     userId: id,
@@ -136,19 +128,19 @@ const Todo = ({ id, selectedDate, onLoad, onDone }: TodoProps) => {
                 console.log('Failed to edit todo :', e);
             }
         })();
+
+        const updated = todos.map(todo => {
+            if (todo.id === todoId) {
+                return { ...todo, status: !todo.status };
+            }
+            return todo;
+        });
+        setTodos(updated);
     };
 
 
-    const handleTime = (todoId: string, timeAt: string, timeAmpm: string) => {
-        setTodos(prev =>
-            prev.map(todo =>
-                todo.id === todoId
-                    ? { ...todo, timeAt, timeAmpm }
-                    : todo
-            )
-        );
-
-        (async () => {
+    const handleTime = async (todoId: string, timeAt: string, timeAmpm: string) => {
+        await (async () => {
             try {
                 await updateTodo(todoId, {
                     userId: id,
@@ -159,6 +151,14 @@ const Todo = ({ id, selectedDate, onLoad, onDone }: TodoProps) => {
                 console.log('시간 업데이트 실패:', e);
             }
         })();
+
+        setTodos(prev =>
+            prev.map(todo =>
+                todo.id === todoId
+                    ? { ...todo, timeAt, timeAmpm }
+                    : todo
+            )
+        );
     };
 
     const handleSelectedCategory = (categoryId: string) => {
